@@ -48,6 +48,10 @@ public class Game extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 pressedKeys.add(e.getKeyCode());
+                if (e.getKeyCode() == KeyEvent.VK_SPACE)
+                {
+                    PlayerEntity.getPlayer().getCurrentWeapon().isAnimating = true;
+                }
             }
 
             @Override

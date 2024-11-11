@@ -22,6 +22,7 @@ public class Renderer extends JPanel {
     }
 
     public void update() {
+        hudRenderer.update();
         Game.GAME.RAYCASTER.update();
     }
 

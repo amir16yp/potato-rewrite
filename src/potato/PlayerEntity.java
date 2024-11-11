@@ -10,6 +10,7 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
+    private Weapon currentWeapon = new Weapon(new Textures("/potato/sprites/gun/shotgun.png", 48, 48), 125);
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
@@ -88,5 +89,13 @@ public class PlayerEntity extends Entity {
         if (isDead) {
             // Implement death behavior (game over, respawn, etc.)
         }
+    }
+
+    public Weapon getCurrentWeapon() {
+        return currentWeapon;
+    }
+
+    public void setCurrentWeapon(Weapon currentWeapon) {
+        this.currentWeapon = currentWeapon;
     }
 }

@@ -9,17 +9,19 @@ public class Weapon {
     private long lastFrameTime;
     private int frameDelay; // Delay between frames in milliseconds
     private double bobOffset;  // Use a double for smoother calculations
-    private int bobDirection = 1; // 1 = up, -1 = down (not used with sine movement)
     private int bobSpeed = 2; // Speed of bobbing effect (controls frequency)
     private int bobRange = 5; // Maximum range of bobbing effect (controls amplitude)
+    private long cooldownTime;
+    private long lastFireTime;  // Track when we last fired
+    private boolean isAnimating = false;
 
-    public boolean isAnimating = false;
-
-    public Weapon(Textures gunSprites, int frameDelay) {
+    public Weapon(Textures gunSprites, int frameDelay, long cooldownTime) {
         this.textures = gunSprites;
         this.frameDelay = frameDelay;
         this.currentFrame = 1; // Start at the first frame
         this.lastFrameTime = System.currentTimeMillis();
+        this.cooldownTime = cooldownTime;
+        this.lastFireTime = 0;
     }
 
     public void update() {
@@ -27,7 +29,7 @@ public class Weapon {
         long timeElapsed = System.currentTimeMillis() - lastFrameTime;
 
         // Sine wave function for smooth up and down movement
-        bobOffset = Math.sin(timeElapsed * 0.005 * bobSpeed) * bobRange; // Modify 0.005 to adjust speed of oscillation
+        bobOffset = Math.sin(timeElapsed * 0.005 * bobSpeed) * bobRange;
 
         if (!isAnimating) {
             currentFrame = 1;  // Reset to the first frame when animation stops
@@ -63,7 +65,20 @@ public class Weapon {
             int adjustedY = y + (int) bobOffset - (scaledHeight - frame.getHeight()) / 2;
 
             // Draw the scaled image with the smooth bobbing offset applied
-            g.drawImage(frame.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH), adjustedX, adjustedY, null);
+            g.drawImage(frame.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH),
+                    adjustedX, adjustedY, null);
+        }
+    }
+
+    public boolean canFire() {
+        return System.currentTimeMillis() - lastFireTime >= cooldownTime;
+    }
+
+    public void fire(double x, double y, double angle) {
+        if (canFire()) {
+            this.isAnimating = true;
+            Projectile.fireProjectile(1, 5, x, y, angle);
+            lastFireTime = System.currentTimeMillis();
         }
     }
 }

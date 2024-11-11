@@ -1,5 +1,7 @@
 package potato;
 
+import java.awt.*;
+
 // Entity.java
 public abstract class Entity {
     protected double x;
@@ -25,15 +27,17 @@ public abstract class Entity {
         this.isDead = false;
     }
 
+    public abstract void render(Graphics2D graphics2d);
+
     public abstract void update(double deltaTime);
 
     protected boolean isInsideWall() {
-        return Game.GAME.RAYCASTER.isWall(x, y);
+        return Game.GAME.RAYCASTER.currentLevel.isWall(x, y);
     }
 
     protected boolean wouldCollide(double newX, double newY) {
         // Check the actual position
-        if (Game.GAME.RAYCASTER.isWall(newX, newY)) {
+        if (Game.GAME.RAYCASTER.currentLevel.isWall(newX, newY)) {
             return true;
         }
 
@@ -50,7 +54,7 @@ public abstract class Entity {
         };
 
         for (double[] point : checkPoints) {
-            if (Game.GAME.RAYCASTER.isWall(point[0], point[1])) {
+            if (Game.GAME.RAYCASTER.currentLevel.isWall(point[0], point[1])) {
                 return true;
             }
         }
@@ -87,6 +91,23 @@ public abstract class Entity {
         health = Math.min(health + amount, maxHealth);
     }
 
+    public void setPosition(int[] position)
+    {
+        this.x = position[0];
+        this.y = position[1];
+    }
+
+    public void setPosition(double x, double y)
+    {
+        this.x = x;
+        this.y =y;
+    }
+
+    public void setPosition(Point point)
+    {
+        this.x = point.getX();
+        this.y = point.getY();
+    }
     // Getters and setters
     public double getX() { return x; }
     public double getY() { return y; }

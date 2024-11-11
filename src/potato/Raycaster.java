@@ -1,20 +1,34 @@
 package potato;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Raycaster {
     public static final double PLANE_DIST = 1.0; // Distance to projection plane
     private static final int FOV = 60; // Field of view in degrees
-    private static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
+    public static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
 
-    private final int[][] map;
-    private final int mapWidth;
-    private final int mapHeight;
-    private final PlayerEntity player;
-    private final java.util.concurrent.CopyOnWriteArrayList<Entity> entities;
-    private final Textures textures; // Add textures field
+    public Level currentLevel = new Level(new int[][]{
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    });
 
-    private class RaycastHit {
+
+    private static class RaycastHit {
         double distance;
         double wallX;
         int textureId;
@@ -28,76 +42,193 @@ public class Raycaster {
         }
     }
 
-    public Raycaster(int[][] map) {
-        this.map = map;
-        this.mapWidth = map[0].length;
-        this.mapHeight = map.length;
-        this.entities = new java.util.concurrent.CopyOnWriteArrayList<>();
-        this.player = PlayerEntity.getPlayer();
-        // Initialize textures with 64x64 tile size
-        this.textures = new Textures("/potato/sprites/textures.png", 16, 16);
+    // Store wall strips for depth sorting
+    private static class WallStrip {
+        int x;
+        double distance;
+        double rayAngle;
+        RaycastHit hit;
+
+        WallStrip(int x, double distance, double rayAngle, RaycastHit hit) {
+            this.x = x;
+            this.distance = distance;
+            this.rayAngle = rayAngle;
+            this.hit = hit;
+        }
     }
 
     public void render(Graphics2D graphics2D) {
-        // Draw ceiling
-        graphics2D.setColor(new Color(100, 100, 200));
-        graphics2D.fillRect(0, 0, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
+        // Create list to store all renderable elements
+        ArrayList<WallStrip> wallStrips = new ArrayList<>();
+        ArrayList<Map.Entry<Entity, Double>> entities = new ArrayList<>(); // Changed this line
 
-        // Draw floor
-        graphics2D.setColor(new Color(100, 100, 100));
-        graphics2D.fillRect(0, Game.INTERNAL_HEIGHT / 2, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
-
-        // Cast rays
+        // Cast rays and store wall strips
+        PlayerEntity player = currentLevel.getPlayer();
         double rayAngleStep = Math.toRadians(FOV) / Game.INTERNAL_WIDTH;
         double startAngle = player.getAngle() - Math.toRadians(FOV) / 2;
 
+        // First pass: collect all wall strips
         for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
             double rayAngle = startAngle + x * rayAngleStep;
-            RaycastHit hit = castRay(rayAngle);
+            RaycastHit hit = castRay(rayAngle, currentLevel);
 
             if (hit.textureId > 0) {
-                // Calculate wall height based on distance
                 double perpWallDist = hit.distance * Math.cos(rayAngle - player.getAngle());
-                int lineHeight = (int) (WALL_HEIGHT / perpWallDist);
+                wallStrips.add(new WallStrip(x, perpWallDist, rayAngle, hit));
+            }
+        }
 
-                // Calculate drawing bounds
-                int drawStart = -lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
-                if (drawStart < 0) drawStart = 0;
-                int drawEnd = lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
-                if (drawEnd >= Game.INTERNAL_HEIGHT) drawEnd = Game.INTERNAL_HEIGHT - 1;
+        // Collect all visible entities and their distances
+        for (Entity entity : currentLevel.getEntities()) {
+            if (entity != player) {  // Don't render the player
+                double dx = entity.getX() - player.getX();
+                double dy = entity.getY() - player.getY();
+                double distance = Math.sqrt(dx * dx + dy * dy);
+                entities.add(new AbstractMap.SimpleEntry<>(entity, distance));
+            }
+        }
 
-                // Get the wall texture
-                java.awt.image.BufferedImage texture = textures.getTile(hit.textureId);
-                if (texture != null) {
-                    // Calculate texture X coordinate
-                    int texX = (int)(hit.wallX * texture.getWidth());
-                    if ((!hit.side && Math.cos(rayAngle) < 0) ||
-                            (hit.side && Math.sin(rayAngle) < 0)) {
-                        texX = texture.getWidth() - texX - 1;
-                    }
+        // Sort both lists from furthest to nearest
+        wallStrips.sort((a, b) -> Double.compare(b.distance, a.distance));
+        entities.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-                    // Draw the textured wall strip
-                    double step = (double) texture.getHeight() / lineHeight;
-                    double texPos = (drawStart - Game.INTERNAL_HEIGHT / 2.0 + lineHeight / 2.0) * step;
+        // Draw sky/ceiling
+        graphics2D.setColor(new Color(100, 149, 237)); // Cornflower blue for sky
+        graphics2D.fillRect(0, 0, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
 
-                    for (int y = drawStart; y < drawEnd; y++) {
-                        int texY = (int) texPos & (texture.getHeight() - 1);
-                        texPos += step;
+        // Draw floor
+        graphics2D.setColor(new Color(169, 169, 169)); // Gray for floor
+        graphics2D.fillRect(0, Game.INTERNAL_HEIGHT / 2, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
 
-                        int color = texture.getRGB(texX, texY);
+        // Render everything in order from back to front
+        while (!wallStrips.isEmpty() || !entities.isEmpty()) {
+            // Get distances of next wall and entity
+            double nextWallDist = wallStrips.isEmpty() ? Double.NEGATIVE_INFINITY :
+                    wallStrips.get(0).distance;
+            double nextEntityDist = entities.isEmpty() ? Double.NEGATIVE_INFINITY :
+                    entities.get(0).getValue();
 
-                        // Apply distance fog
-                        float fogFactor = (float) Math.min(1.0, hit.distance / 10.0);
-                        color = applyFog(color, fogFactor);
-
-                        graphics2D.setColor(new Color(color));
-                        graphics2D.drawLine(x, y, x, y);
-                    }
-                }
+            if (nextWallDist > nextEntityDist) {
+                // Render furthest wall strip
+                WallStrip strip = wallStrips.remove(0);
+                renderWallColumn(graphics2D, strip.x, strip.rayAngle, strip.hit);
+            } else {
+                // Render furthest entity
+                Map.Entry<Entity, Double> entityEntry = entities.remove(0);
+                entityEntry.getKey().render(graphics2D);
             }
         }
     }
 
+    public void update()
+    {
+        currentLevel.update();
+    }
+
+    private void renderWallColumn(Graphics2D graphics2D, int x, double rayAngle, RaycastHit hit) {
+        // Calculate wall height based on distance
+        double perpWallDist = hit.distance * Math.cos(rayAngle - currentLevel.getPlayer().getAngle());
+        int lineHeight = (int) (WALL_HEIGHT / perpWallDist);
+
+        // Calculate drawing bounds
+        int drawStart = -lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
+        if (drawStart < 0) drawStart = 0;
+        int drawEnd = lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
+        if (drawEnd >= Game.INTERNAL_HEIGHT) drawEnd = Game.INTERNAL_HEIGHT - 1;
+
+        // Get the wall texture
+        BufferedImage texture = currentLevel.getTexture(hit.textureId);
+        if (texture != null) {
+            // Calculate texture X coordinate
+            int texX = (int)(hit.wallX * texture.getWidth());
+            if ((!hit.side && Math.cos(rayAngle) < 0) ||
+                    (hit.side && Math.sin(rayAngle) < 0)) {
+                texX = texture.getWidth() - texX - 1;
+            }
+
+            // Draw the textured wall strip
+            double step = (double) texture.getHeight() / lineHeight;
+            double texPos = (drawStart - Game.INTERNAL_HEIGHT / 2.0 + lineHeight / 2.0) * step;
+
+            for (int y = drawStart; y < drawEnd; y++) {
+                int texY = (int) texPos & (texture.getHeight() - 1);
+                texPos += step;
+
+                int color = texture.getRGB(texX, texY);
+
+                // Apply distance fog
+                float fogFactor = (float) Math.min(1.0, hit.distance / 10.0);
+                color = applyFog(color, fogFactor);
+
+                graphics2D.setColor(new Color(color));
+                graphics2D.drawLine(x, y, x, y);
+            }
+        }
+    }
+
+    private RaycastHit castRay(double rayAngle, Level level) {
+        PlayerEntity player = level.getPlayer();
+        double rayDirX = Math.cos(rayAngle);
+        double rayDirY = Math.sin(rayAngle);
+
+        // Current map position
+        int mapX = (int) player.getX();
+        int mapY = (int) player.getY();
+
+        // Length of ray from current position to next x or y-side
+        double deltaDistX = Math.abs(1 / rayDirX);
+        double deltaDistY = Math.abs(1 / rayDirY);
+
+        // Calculate step and initial sideDist
+        int stepX = rayDirX < 0 ? -1 : 1;
+        int stepY = rayDirY < 0 ? -1 : 1;
+
+        double sideDistX = rayDirX < 0
+                ? (player.getX() - mapX) * deltaDistX
+                : (mapX + 1.0 - player.getX()) * deltaDistX;
+
+        double sideDistY = rayDirY < 0
+                ? (player.getY() - mapY) * deltaDistY
+                : (mapY + 1.0 - player.getY()) * deltaDistY;
+
+        // Perform DDA
+        boolean hit = false;
+        boolean side = false;
+        int wallType = 0;
+
+        while (!hit) {
+            if (sideDistX < sideDistY) {
+                sideDistX += deltaDistX;
+                mapX += stepX;
+                side = false;
+            } else {
+                sideDistY += deltaDistY;
+                mapY += stepY;
+                side = true;
+            }
+
+            if (mapX < 0 || mapX >= level.getMapWidth() ||
+                    mapY < 0 || mapY >= level.getMapHeight()) {
+                hit = true;
+                wallType = 1;
+            } else if (level.getWallType(mapX, mapY) > 0) {
+                hit = true;
+                wallType = level.getWallType(mapX, mapY);
+            }
+        }
+
+        // Calculate distance and wall X
+        double wallDist = side
+                ? (mapY - player.getY() + (1 - stepY) / 2) / rayDirY
+                : (mapX - player.getX() + (1 - stepX) / 2) / rayDirX;
+
+        double wallX = side
+                ? player.getX() + wallDist * rayDirX
+                : player.getY() + wallDist * rayDirY;
+        wallX -= Math.floor(wallX);
+
+        return new RaycastHit(wallDist, wallX, wallType, side);
+    }
 
     private int applyFog(int color, float fogFactor) {
         int a = (color >> 24) & 0xff;
@@ -111,115 +242,5 @@ public class Raycaster {
         b = (int) (b * (1 - fogFactor) + 128 * fogFactor);
 
         return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
-    // [Other methods remain the same]
-    public boolean isWall(double x, double y) {
-        int mapX = (int) x;
-        int mapY = (int) y;
-
-        if (mapX < 0 || mapX >= mapWidth || mapY < 0 || mapY >= mapHeight) {
-            return true;
-        }
-
-        return map[mapY][mapX] > 0;
-    }
-
-    public void update() {
-        player.update(Game.GAMELOOP.getDeltaTime());
-        entities.removeIf(Entity::isDead);
-        entities.forEach(entity -> entity.update(Game.GAMELOOP.getDeltaTime()));
-    }
-
-    private RaycastHit castRay(double rayAngle) {
-        double rayDirX = Math.cos(rayAngle);
-        double rayDirY = Math.sin(rayAngle);
-
-        // Current map position
-        int mapX = (int) player.getX();
-        int mapY = (int) player.getY();
-
-        // Length of ray from current position to next x or y-side
-        double sideDistX;
-        double sideDistY;
-
-        // Length of ray from one x or y-side to next x or y-side
-        double deltaDistX = Math.abs(1 / rayDirX);
-        double deltaDistY = Math.abs(1 / rayDirY);
-
-        // What direction to step in x or y-direction (either +1 or -1)
-        int stepX;
-        int stepY;
-
-        // Calculate step and initial sideDist
-        if (rayDirX < 0) {
-            stepX = -1;
-            sideDistX = (player.getX() - mapX) * deltaDistX;
-        } else {
-            stepX = 1;
-            sideDistX = (mapX + 1.0 - player.getX()) * deltaDistX;
-        }
-
-        if (rayDirY < 0) {
-            stepY = -1;
-            sideDistY = (player.getY() - mapY) * deltaDistY;
-        } else {
-            stepY = 1;
-            sideDistY = (mapY + 1.0 - player.getY()) * deltaDistY;
-        }
-
-        // Perform DDA (Digital Differential Analysis)
-        boolean hit = false;
-        boolean side = false; // Was a NS or EW wall hit?
-        int wallType = 0;
-
-        while (!hit) {
-            // Jump to next map square, either in x-direction, or in y-direction
-            if (sideDistX < sideDistY) {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-                side = false;
-            } else {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-                side = true;
-            }
-
-            // Check if ray has hit a wall
-            if (mapX < 0 || mapX >= mapWidth || mapY < 0 || mapY >= mapHeight) {
-                hit = true;
-                wallType = 1; // Default wall type for out of bounds
-            } else if (map[mapY][mapX] > 0) {
-                hit = true;
-                wallType = map[mapY][mapX];
-            }
-        }
-
-        // Calculate distance to wall
-        double wallDist;
-        if (!side) {
-            wallDist = (mapX - player.getX() + (1 - stepX) / 2) / rayDirX;
-        } else {
-            wallDist = (mapY - player.getY() + (1 - stepY) / 2) / rayDirY;
-        }
-
-        // Calculate wall X coordinate (for texturing)
-        double wallX;
-        if (side) {
-            wallX = player.getX() + wallDist * rayDirX;
-        } else {
-            wallX = player.getY() + wallDist * rayDirY;
-        }
-        wallX -= Math.floor(wallX);
-
-        return new RaycastHit(wallDist, wallX, wallType, side);
-    }
-
-    public void addEntity(Entity entity) {
-        entities.add(entity);
-    }
-
-    public PlayerEntity getPlayer() {
-        return player;
     }
 }

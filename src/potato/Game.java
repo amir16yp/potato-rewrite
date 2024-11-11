@@ -17,16 +17,7 @@ public class Game extends JFrame {
     public Raycaster RAYCASTER;
 
     private final Set<Integer> pressedKeys = new HashSet<>();
-    private static final int[][] DEFAULT_MAP = {
-            {1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 2, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 2, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1}
-    };
+
 
     public Game() {
         GAME = this;
@@ -50,7 +41,8 @@ public class Game extends JFrame {
                 pressedKeys.add(e.getKeyCode());
                 if (e.getKeyCode() == KeyEvent.VK_SPACE)
                 {
-                    PlayerEntity.getPlayer().getCurrentWeapon().isAnimating = true;
+                    PlayerEntity player = PlayerEntity.getPlayer();
+                    player.getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
                 }
             }
 
@@ -59,7 +51,7 @@ public class Game extends JFrame {
                 pressedKeys.remove(e.getKeyCode());
             }
         });
-        RAYCASTER = new Raycaster(DEFAULT_MAP);
+        RAYCASTER = new Raycaster();
 
         // Initialize and start game loop
         GAMELOOP = new GameLoop();
@@ -86,10 +78,5 @@ public class Game extends JFrame {
 
             GAMELOOP.start();
         });
-    }
-
-    // Get the current map dimensions
-    public Dimension getMapDimensions() {
-        return new Dimension(DEFAULT_MAP[0].length, DEFAULT_MAP.length);
     }
 }

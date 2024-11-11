@@ -1,5 +1,6 @@
 package potato;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 // PlayerEntity.java
@@ -10,7 +11,7 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
-    private Weapon currentWeapon = new Weapon(new Textures("/potato/sprites/gun/shotgun.png", 48, 48), 125);
+    private Weapon currentWeapon = new Weapon(new Textures("/potato/sprites/gun/shotgun.png", 48, 48), 50, 2000);
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
@@ -23,6 +24,11 @@ public class PlayerEntity extends Entity {
             player = new PlayerEntity(1.5, 1.5, 0.0);
         }
         return player;
+    }
+
+    @Override
+    public void render(Graphics2D graphics2d) {
+        return;
     }
 
     @Override
@@ -64,11 +70,6 @@ public class PlayerEntity extends Entity {
             double nextY = y + strafeY * actualMoveSpeed;
             tryMove(nextX, nextY);
 
-        }
-
-        if (Game.GAME.isKeyPressed(' '))
-        {
-            System.out.println("SPACE PRESSED");
         }
 
         // Rotation

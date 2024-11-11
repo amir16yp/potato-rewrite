@@ -19,28 +19,11 @@ public class Textures {
         this.tileHeight = tileHeight;
         this.tiles = new HashMap<>();
         this.logger = new Logger(this.getClass().getName());
-        this.logger.addPrefix(tilesetPath);
+        this.tilesetImage = Utils.loadImage(tilesetPath);
         this.tilesetPath = tilesetPath;
     }
 
-    private void loadTilesetImage() {
-        if (tilesetImage == null) {
-            try {
-                tilesetImage = ImageIO.read(getClass().getResourceAsStream(tilesetPath));
-                if (tilesetImage == null) {
-                    throw new IOException("Failed to load tileset image");
-                }
-                logger.log("Loaded tileset image");
-            } catch (IOException e) {
-                logger.log("Error loading tileset: " + e.getMessage());
-                throw new RuntimeException("Failed to load tileset", e);
-            }
-        }
-    }
-
     private BufferedImage loadTile(int id) {
-        loadTilesetImage();
-
         int cols = tilesetImage.getWidth() / tileWidth;
         int row = (id - 1) / cols;
         int col = (id - 1) % cols;
@@ -85,7 +68,6 @@ public class Textures {
     }
 
     public int getTileCount() {
-        loadTilesetImage();
         int cols = tilesetImage.getWidth() / tileWidth;
         int rows = tilesetImage.getHeight() / tileHeight;
         return cols * rows;

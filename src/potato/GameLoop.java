@@ -5,7 +5,6 @@ public class GameLoop implements Runnable {
     private static final float NANOS_PER_SECOND = 1_000_000_000.0f;
     private static final float MILLIS_PER_SECOND = 1000.0f;
 
-    private final Game game;
     private boolean running = false;
     private boolean paused = false;
     private long lastFrameTime;
@@ -16,8 +15,8 @@ public class GameLoop implements Runnable {
     private long fps = 0;
     private final Thread thread = new Thread(this);
 
-    public GameLoop(Game game) {
-        this.game = game;
+    public GameLoop() {
+
     }
 
     public int getTargetFPS() {
@@ -74,8 +73,8 @@ public class GameLoop implements Runnable {
                 deltaTimeMillis = deltaTime * MILLIS_PER_SECOND;
                 lastFrameTime = currentTime;
 
-                game.update();
-                game.render();
+                Game.RENDERER.update();
+                Game.GAME.repaint();
                 updateFPS();
 
                 int targetFPS = getTargetFPS();

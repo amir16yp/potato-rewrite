@@ -18,7 +18,10 @@ public class GameLoop implements Runnable {
     private int frameCount = 0;
     private long fps = 0;
 
+    private int targetFPS;
+
     private final Thread thread = new Thread(this);
+    private long lastFPSUpdateTime = 0;
 
     public GameLoop() {
         // Initialize frame times array
@@ -27,12 +30,13 @@ public class GameLoop implements Runnable {
         }
     }
 
+
     public int getTargetFPS() {
-        return 0;
+        return targetFPS;
     }
 
-    public float adjustSpeedForFrameRate(float speed) {
-        return speed * (deltaTime * EXPECTED_FPS);
+    public void setTargetFPS(int targetFPS) {
+        this.targetFPS = targetFPS;
     }
 
     public float getDeltaTime() {
@@ -78,19 +82,15 @@ public class GameLoop implements Runnable {
             if (!paused) {
                 long frameStartTime = System.nanoTime();
 
-                // Calculate delta time
                 deltaTime = (frameStartTime - lastFrameTime) / NANOS_PER_SECOND;
                 deltaTimeMillis = deltaTime * MILLIS_PER_SECOND;
                 lastFrameTime = frameStartTime;
 
-                // Update and render
                 Game.RENDERER.update();
                 Game.GAME.repaint();
 
-                // Update FPS calculation
                 updateFPS(frameStartTime);
 
-                // Frame rate limiting
                 int targetFPS = getTargetFPS();
                 if (targetFPS > 0) {
                     long targetFrameTime = (long) (NANOS_PER_SECOND / targetFPS);
@@ -104,7 +104,6 @@ public class GameLoop implements Runnable {
                     }
                 }
             } else {
-                // When paused, sleep for a short time to avoid busy-waiting
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -114,20 +113,24 @@ public class GameLoop implements Runnable {
         }
     }
 
+
     private void updateFPS(long currentTime) {
-        // Store frame time
         frameTimes[frameTimeIndex] = currentTime;
         frameTimeIndex = (frameTimeIndex + 1) % FPS_SAMPLE_SIZE;
         frameCount++;
 
-        // Only calculate FPS after collecting enough samples
         if (frameCount >= FPS_SAMPLE_SIZE) {
             long oldestFrame = frameTimes[(frameTimeIndex + 1) % FPS_SAMPLE_SIZE];
-            if (oldestFrame > 0) {  // Ensure we have valid data
-                // Calculate average FPS over the sample window
-                double timeElapsed = (currentTime - oldestFrame) / (double)NANOS_PER_SECOND;
-                fps = Math.round(FPS_SAMPLE_SIZE / timeElapsed);
+            if (oldestFrame > 0) {
+                double timeElapsed = (currentTime - oldestFrame) / (double) NANOS_PER_SECOND;
+
+                // Update FPS once per second
+                if (currentTime - lastFPSUpdateTime >= NANOS_PER_SECOND) {
+                    fps = Math.round(FPS_SAMPLE_SIZE / timeElapsed);
+                    lastFPSUpdateTime = currentTime;
+                }
             }
         }
     }
+
 }

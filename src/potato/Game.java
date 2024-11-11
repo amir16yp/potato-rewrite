@@ -9,21 +9,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Game extends JFrame {
-    public static final int INTERNAL_WIDTH = 640;
-    public static final int INTERNAL_HEIGHT = 480;
+    public static final int INTERNAL_WIDTH = 256;
+    public static final int INTERNAL_HEIGHT = 240;
     public static Game GAME;
     public static GameLoop GAMELOOP;
     public static Renderer RENDERER;
     public Raycaster RAYCASTER;
 
+    public static final SoundManager SOUND_MANAGER = new SoundManager();
     private final Set<Integer> pressedKeys = new HashSet<>();
 
 
     public Game() {
         GAME = this;
 
-        // Window setup
-        setTitle("Raycaster Game");
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setTitle("Potato");
+        setIconImage(Utils.loadImage("/potato/sprites/icon.png"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(true);
 
@@ -39,10 +41,13 @@ public class Game extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 pressedKeys.add(e.getKeyCode());
-                if (e.getKeyCode() == KeyEvent.VK_SPACE)
-                {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     PlayerEntity player = PlayerEntity.getPlayer();
                     player.getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    RENDERER.setPaused(!RENDERER.isPaused());
                 }
             }
 

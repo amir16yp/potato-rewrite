@@ -11,7 +11,7 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
-    private Weapon currentWeapon = new Weapon(new Textures("/potato/sprites/gun/shotgun.png", 48, 48), 50, 2000);
+    private Weapon currentWeapon = Weapons.SHOTGUN;
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
@@ -47,29 +47,32 @@ public class PlayerEntity extends Entity {
         double strafeX = -dirY;
         double strafeY = dirX;
 
-        // Forward/Backward movement
+// Calculate the desired movement vector
+        double moveX = 0, moveY = 0;
+
         if (Game.GAME.isKeyPressed(KeyEvent.VK_W)) {
-            double nextX = x + dirX * actualMoveSpeed;
-            double nextY = y + dirY * actualMoveSpeed;
-            tryMove(nextX, nextY);
+            moveX += dirX;
+            moveY += dirY;
         }
         if (Game.GAME.isKeyPressed(KeyEvent.VK_S)) {
-            double nextX = x - dirX * actualMoveSpeed;
-            double nextY = y - dirY * actualMoveSpeed;
-            tryMove(nextX, nextY);
+            moveX -= dirX;
+            moveY -= dirY;
         }
-
-        // Strafe movement
         if (Game.GAME.isKeyPressed(KeyEvent.VK_A)) {
-            double nextX = x - strafeX * actualMoveSpeed;
-            double nextY = y - strafeY * actualMoveSpeed;
-            tryMove(nextX, nextY);
+            moveX -= strafeX;
+            moveY -= strafeY;
         }
         if (Game.GAME.isKeyPressed(KeyEvent.VK_D)) {
-            double nextX = x + strafeX * actualMoveSpeed;
-            double nextY = y + strafeY * actualMoveSpeed;
-            tryMove(nextX, nextY);
+            moveX += strafeX;
+            moveY += strafeY;
+        }
 
+// Normalize the movement vector if we're moving
+        double length = Math.sqrt(moveX * moveX + moveY * moveY);
+        if (length > 0) {
+            moveX = moveX / length * actualMoveSpeed;
+            moveY = moveY / length * actualMoveSpeed;
+            tryMove(x + moveX, y + moveY);
         }
 
         // Rotation

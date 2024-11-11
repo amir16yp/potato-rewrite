@@ -28,6 +28,6 @@ public class HUD {
         int weaponY = Game.INTERNAL_HEIGHT - hudHeight - currentWeapon.textures.getTileHeight() / 2;  // Above the HUD
 
         // Render the weapon sprite
-        currentWeapon.render(g, weaponX, weaponY -40, 4);
+        currentWeapon.render(g, weaponX, weaponY -40);
     }
 }

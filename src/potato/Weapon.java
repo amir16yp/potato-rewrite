@@ -14,14 +14,16 @@ public class Weapon {
     private long cooldownTime;
     private long lastFireTime;  // Track when we last fired
     private boolean isAnimating = false;
+    private int scaleFactor;
 
-    public Weapon(Textures gunSprites, int frameDelay, long cooldownTime) {
+    public Weapon(Textures gunSprites, int frameDelay, long cooldownTime, int scaleFactor) {
         this.textures = gunSprites;
         this.frameDelay = frameDelay;
         this.currentFrame = 1; // Start at the first frame
         this.lastFrameTime = System.currentTimeMillis();
         this.cooldownTime = cooldownTime;
         this.lastFireTime = 0;
+        this.scaleFactor = scaleFactor;
     }
 
     public void update() {
@@ -50,23 +52,23 @@ public class Weapon {
         }
     }
 
-    public void render(Graphics2D g, int x, int y, int scale) {
+    public void render(Graphics2D g, int x, int y) {
         // Get the current frame image from Textures
         BufferedImage frame = textures.getTile(currentFrame);
 
         // Check if the frame is not null
         if (frame != null) {
             // Scale the image size
-            int scaledWidth = frame.getWidth() * scale;
-            int scaledHeight = frame.getHeight() * scale;
+            double scaledWidth = frame.getWidth() * this.scaleFactor;
+            double scaledHeight = frame.getHeight() * this.scaleFactor;
 
             // Adjust the position to account for scaling (centering the scaled image)
-            int adjustedX = x - (scaledWidth - frame.getWidth()) / 2;
-            int adjustedY = y + (int) bobOffset - (scaledHeight - frame.getHeight()) / 2;
+            double adjustedX = x - (scaledWidth - frame.getWidth()) / 2;
+            double adjustedY = y + (int) bobOffset - (scaledHeight - frame.getHeight()) / 2;
 
             // Draw the scaled image with the smooth bobbing offset applied
-            g.drawImage(frame.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH),
-                    adjustedX, adjustedY, null);
+            g.drawImage(frame.getScaledInstance((int) scaledWidth, (int) scaledHeight, Image.SCALE_SMOOTH),
+                    (int) adjustedX, (int) adjustedY, null);
         }
     }
 
@@ -76,8 +78,8 @@ public class Weapon {
 
     public void fire(double x, double y, double angle) {
         if (canFire()) {
-            this.isAnimating = true;
             Projectile.fireProjectile(1, 5, x, y, angle);
+            this.isAnimating = true;
             lastFireTime = System.currentTimeMillis();
         }
     }

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="potato-rewrite:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/potato_rewrite_jar</output-path>
+    <root id="archive" name="potato-rewrite.jar">
+      <element id="module-output" name="potato-rewrite" />
+    </root>
+  </artifact>
+</component>

@@ -8,20 +8,20 @@ import java.util.Map;
 
 public class Raycaster {
     public static final double PLANE_DIST = 1.0; // Distance to projection plane
-    private static final int FOV = 60; // Field of view in degrees
+    private static final int FOV = 70; // Field of view in degrees
     public static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
 
     public Level currentLevel = new Level(new int[][]{
             {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
             {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,1,1,1,1,0,0,0,0,0,0,0,1    ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
             {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
             {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+            {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
             {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
             {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
             {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -57,15 +57,18 @@ public class Raycaster {
         }
     }
 
-    public void render(Graphics2D graphics2D) {
-        // Create list to store all renderable elements
-        ArrayList<WallStrip> wallStrips = new ArrayList<>();
-        ArrayList<Map.Entry<Entity, Double>> entities = new ArrayList<>(); // Changed this line
 
-        // Cast rays and store wall strips
+    public void render(Graphics2D graphics2D) {
         PlayerEntity player = currentLevel.getPlayer();
         double rayAngleStep = Math.toRadians(FOV) / Game.INTERNAL_WIDTH;
         double startAngle = player.getAngle() - Math.toRadians(FOV) / 2;
+
+        // Render floor and ceiling first
+        renderFloorAndCeiling(graphics2D, player, startAngle);
+
+        // Rest of the existing rendering code for walls and entities...
+        ArrayList<WallStrip> wallStrips = new ArrayList<>();
+        ArrayList<Map.Entry<Entity, Double>> entities = new ArrayList<>();
 
         // First pass: collect all wall strips
         for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
@@ -78,9 +81,9 @@ public class Raycaster {
             }
         }
 
-        // Collect all visible entities and their distances
+        // Collect entities...
         for (Entity entity : currentLevel.getEntities()) {
-            if (entity != player) {  // Don't render the player
+            if (entity != player) {
                 double dx = entity.getX() - player.getX();
                 double dy = entity.getY() - player.getY();
                 double distance = Math.sqrt(dx * dx + dy * dy);
@@ -88,34 +91,77 @@ public class Raycaster {
             }
         }
 
-        // Sort both lists from furthest to nearest
+        // Sort and render everything from back to front...
         wallStrips.sort((a, b) -> Double.compare(b.distance, a.distance));
         entities.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-        // Draw sky/ceiling
-        graphics2D.setColor(new Color(100, 149, 237)); // Cornflower blue for sky
-        graphics2D.fillRect(0, 0, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
-
-        // Draw floor
-        graphics2D.setColor(new Color(169, 169, 169)); // Gray for floor
-        graphics2D.fillRect(0, Game.INTERNAL_HEIGHT / 2, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
-
-        // Render everything in order from back to front
         while (!wallStrips.isEmpty() || !entities.isEmpty()) {
-            // Get distances of next wall and entity
-            double nextWallDist = wallStrips.isEmpty() ? Double.NEGATIVE_INFINITY :
-                    wallStrips.get(0).distance;
-            double nextEntityDist = entities.isEmpty() ? Double.NEGATIVE_INFINITY :
-                    entities.get(0).getValue();
+            double nextWallDist = wallStrips.isEmpty() ? Double.NEGATIVE_INFINITY : wallStrips.get(0).distance;
+            double nextEntityDist = entities.isEmpty() ? Double.NEGATIVE_INFINITY : entities.get(0).getValue();
 
             if (nextWallDist > nextEntityDist) {
-                // Render furthest wall strip
                 WallStrip strip = wallStrips.remove(0);
                 renderWallColumn(graphics2D, strip.x, strip.rayAngle, strip.hit);
             } else {
-                // Render furthest entity
                 Map.Entry<Entity, Double> entityEntry = entities.remove(0);
                 entityEntry.getKey().render(graphics2D);
+            }
+        }
+    }
+
+    private void renderFloorAndCeiling(Graphics2D graphics2D, PlayerEntity player, double startAngle) {
+        // Camera plane
+        double planeX = -Math.sin(player.getAngle()) * Math.tan(Math.toRadians(FOV) / 2);
+        double planeY = Math.cos(player.getAngle()) * Math.tan(Math.toRadians(FOV) / 2);
+
+        // For each horizontal line on screen
+        for (int y = Game.INTERNAL_HEIGHT / 2; y < Game.INTERNAL_HEIGHT; y++) {
+            // Current distance from camera to floor
+            double rowDistance = (double) WALL_HEIGHT / (y - Game.INTERNAL_HEIGHT / 2);
+
+            // Calculate stepping values for ray directions
+            double floorStepX = rowDistance * (2 * planeX) / Game.INTERNAL_WIDTH;
+            double floorStepY = rowDistance * (2 * planeY) / Game.INTERNAL_WIDTH;
+
+            // Starting position for floor casting
+            double floorX = player.getX() + rowDistance * Math.cos(startAngle);
+            double floorY = player.getY() + rowDistance * Math.sin(startAngle);
+
+            for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
+                // Get the exact position on the floor/ceiling
+                int cellX = (int) floorX;
+                int cellY = (int) floorY;
+
+                // Floor pixel
+                if (currentLevel.floorTexture != null) {
+                    // Calculate texture coordinates
+                    int tx = (int) ((floorX - cellX) * currentLevel.floorTexture.getWidth()) & (currentLevel.floorTexture.getWidth() - 1);
+                    int ty = (int) ((floorY - cellY) * currentLevel.floorTexture.getHeight()) & (currentLevel.floorTexture.getHeight() - 1);
+
+                    int color = currentLevel.floorTexture.getRGB(tx, ty);
+                    color = applyFog(color, (float) Math.min(1.0, rowDistance / 10.0));
+                    graphics2D.setColor(new Color(color));
+                } else {
+                    graphics2D.setColor(currentLevel.floorColor);
+                }
+                graphics2D.drawLine(x, y, x, y);
+
+                // Ceiling pixel (mirror of floor)
+                int ceilingY = Game.INTERNAL_HEIGHT - y - 1;
+                if (currentLevel.ceilingTexture != null) {
+                    int tx = (int) ((floorX - cellX) * currentLevel.ceilingTexture.getWidth()) & (currentLevel.ceilingTexture.getWidth() - 1);
+                    int ty = (int) ((floorY - cellY) * currentLevel.ceilingTexture.getHeight()) & (currentLevel.ceilingTexture.getHeight() - 1);
+
+                    int color = currentLevel.ceilingTexture.getRGB(tx, ty);
+                    color = applyFog(color, (float) Math.min(1.0, rowDistance / 10.0));
+                    graphics2D.setColor(new Color(color));
+                } else {
+                    graphics2D.setColor(currentLevel.ceilingColor);
+                }
+                graphics2D.drawLine(x, ceilingY, x, ceilingY);
+
+                floorX += floorStepX;
+                floorY += floorStepY;
             }
         }
     }

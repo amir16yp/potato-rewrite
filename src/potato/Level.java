@@ -12,7 +12,11 @@ public class Level {
     private final int mapHeight;
     private final PlayerEntity player;
     private final CopyOnWriteArrayList<Entity> entities;
-    private final Textures textures;
+    private Textures textures;
+    public BufferedImage floorTexture;
+    public BufferedImage ceilingTexture;
+    public Color floorColor;
+    public Color ceilingColor;
 
     public Level(int[][] map) {
         this.map = map;
@@ -21,6 +25,8 @@ public class Level {
         this.entities = new CopyOnWriteArrayList<>();
         this.player = PlayerEntity.getPlayer();
         this.textures = new Textures("/potato/sprites/textures.png", 16, 16);
+        this.floorTexture = textures.getTile(23);
+        this.ceilingTexture = textures.getTile(29);
     }
 
     public void render(Graphics2D graphics2D) {

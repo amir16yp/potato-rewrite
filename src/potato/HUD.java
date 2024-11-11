@@ -20,8 +20,8 @@ public class HUD {
         g.fillRect(0, Game.INTERNAL_HEIGHT - hudHeight, Game.INTERNAL_WIDTH, hudHeight);
 
         // Draw FPS counter
-        g.setColor(Color.WHITE);
-        g.drawString("FPS: " + Game.GAMELOOP.getFPS(), 10, Game.INTERNAL_HEIGHT - hudHeight + 20);
+        g.setColor(Color.RED);
+        g.drawString("FPS: " + Game.GAMELOOP.getFPS(), 0, 10);
 
         // Position of the weapon above the HUD (centered horizontally)
         int weaponX = (Game.INTERNAL_WIDTH - currentWeapon.textures.getTileWidth()) / 2;  // Centered horizontally

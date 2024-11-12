@@ -18,8 +18,6 @@ public class GameLoop implements Runnable {
     private int frameCount = 0;
     private long fps = 0;
 
-    private int targetFPS;
-
     private final Thread thread = new Thread(this);
     private long lastFPSUpdateTime = 0;
 
@@ -33,10 +31,6 @@ public class GameLoop implements Runnable {
 
     public int getTargetFPS() {
         return SaveSystem.SETTINGS_SAVE.getInt("CAP_FPS", 0);
-    }
-
-    public void setTargetFPS(int targetFPS) {
-        this.targetFPS = targetFPS;
     }
 
     public float getDeltaTime() {

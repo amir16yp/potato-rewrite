@@ -47,7 +47,7 @@ public class SpriteEntity extends Entity {
         }
 
         // Calculate screen position
-        double projectedX = Game.INTERNAL_WIDTH / 2 * (1 + relativeAngle / (Game.GAME.RAYCASTER.FOV / 2));
+        double projectedX = Game.INTERNAL_WIDTH / 2 * (1 + relativeAngle / (Raycaster.FOV / 2));
 
         // Calculate sprite size based on distance
         double size = (Game.INTERNAL_HEIGHT * scale) / distance;

@@ -17,7 +17,7 @@ public class Projectile extends Entity {
     public static Projectile fireProjectile(int textureId, double speed, double x, double y, double angle) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);
         Projectile projectile = new Projectile(projectileTexture, speed, x, y, angle);
-        Game.GAME.RAYCASTER.currentLevel.addEntity(projectile);
+        Game.RAYCASTER.currentLevel.addEntity(projectile);
         return projectile;
     }
 
@@ -41,14 +41,14 @@ public class Projectile extends Entity {
         x += dx;
         y += dy;
 
-        if (Game.GAME.RAYCASTER.currentLevel.isWall(x, y)) {
+        if (Game.RAYCASTER.currentLevel.isWall(x, y)) {
             dead = true;
         }
     }
     @Override
     public void render(Graphics2D g) {
         if (sprite != null) {
-            PlayerEntity player = Game.GAME.RAYCASTER.currentLevel.getPlayer();
+            PlayerEntity player = Game.RAYCASTER.currentLevel.getPlayer();
 
             // Calculate relative position to player
             double relativeX = x - player.getX();

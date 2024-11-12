@@ -45,7 +45,7 @@ public class Game extends JFrame {
                 pressedKeys.add(e.getKeyCode());
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     PlayerEntity player = PlayerEntity.getPlayer();
-                    player.getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
+                    player.getInventory().getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {

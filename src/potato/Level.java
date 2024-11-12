@@ -25,36 +25,8 @@ public class Level {
         this.entities = new CopyOnWriteArrayList<>();
         this.player = PlayerEntity.getPlayer();
         this.textures = new Textures("/potato/sprites/textures.png", 16, 16);
-        this.floorTexture = textures.getTile(23);
-        this.ceilingTexture = textures.getTile(29);
-    }
-
-    public void render(Graphics2D graphics2D) {
-        // Draw ceiling
-        graphics2D.setColor(new Color(100, 100, 200));
-        graphics2D.fillRect(0, 0, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
-
-        // Draw floor
-        graphics2D.setColor(new Color(100, 100, 100));
-        graphics2D.fillRect(0, Game.INTERNAL_HEIGHT / 2, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT / 2);
-
-        // Render walls using raycaster
-        //raycaster.renderWalls(graphics2D);
-
-        // Sort entities by distance (furthest first)
-        ArrayList<Entity> sortedEntities = new ArrayList<>(entities);
-        sortedEntities.sort((e1, e2) -> {
-            double dist1 = Math.pow(e1.getX() - player.getX(), 2) + Math.pow(e1.getY() - player.getY(), 2);
-            double dist2 = Math.pow(e2.getX() - player.getX(), 2) + Math.pow(e2.getY() - player.getY(), 2);
-            return Double.compare(dist2, dist1);
-        });
-
-        // Render all entities except player
-        for (Entity entity : sortedEntities) {
-            if (!(entity instanceof PlayerEntity)) {
-                entity.render(graphics2D);
-            }
-        }
+        this.floorTexture = textures.getTile(17);
+        this.ceilingTexture = textures.getTile(13);
     }
 
     public void update() {

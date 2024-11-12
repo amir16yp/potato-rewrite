@@ -3,7 +3,10 @@ package potato;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Utils {
 
@@ -29,20 +32,39 @@ public class Utils {
      * @return The loaded Clip.
      * @throws RuntimeException if the audio clip cannot be loaded.
      */
-    public static final Clip loadClip(String pathFromJar) {
+    public static Clip loadClip(String pathFromJar) {
         try {
-            // Get the audio input stream
-            AudioInputStream audioIn = AudioSystem.getAudioInputStream(Utils.class.getResourceAsStream(pathFromJar));
+            // Get resource as stream
+            InputStream inputStream = Utils.class.getResourceAsStream(pathFromJar);
+            if (inputStream == null) {
+                throw new RuntimeException("Resource not found: " + pathFromJar);
+            }
 
-            // Get a clip from the audio system
+            // Convert to byte array first to allow mark/reset
+            byte[] buffer = toByteArray(inputStream);
+            InputStream bufferedInput = new ByteArrayInputStream(buffer);
+
+            // Get and open the audio input stream
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedInput);
+
+            // Create and open the clip
             Clip clip = AudioSystem.getClip();
-
-            // Open the clip with the audio input stream
-            clip.open(audioIn);
+            clip.open(audioInputStream);
 
             return clip;
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             throw new RuntimeException("Failed to load audio clip: " + pathFromJar, e);
         }
+    }
+
+    // Helper method to read input stream to byte array
+    private static byte[] toByteArray(InputStream input) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int n;
+        while ((n = input.read(buffer)) != -1) {
+            output.write(buffer, 0, n);
+        }
+        return output.toByteArray();
     }
 }

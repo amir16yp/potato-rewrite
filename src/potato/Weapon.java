@@ -19,8 +19,9 @@ public class Weapon {
     private BufferedImage icon;
     private int ammoAmount = 30;
     private int maxAmmoAmount = 30;
+    private int bulletSpriteID;
 
-    public Weapon(Textures gunSprites, int frameDelay, long cooldownTime, int scaleFactor, String weaponName, BufferedImage icon) {
+    public Weapon(Textures gunSprites, int frameDelay, long cooldownTime, int scaleFactor, String weaponName, BufferedImage icon, int bulletSpriteID) {
         this.textures = gunSprites;
         this.frameDelay = frameDelay;
         this.weaponName = weaponName;
@@ -31,6 +32,7 @@ public class Weapon {
         this.scaleFactor = scaleFactor;
         this.weaponName = weaponName;
         this.icon = icon;
+        this.bulletSpriteID = bulletSpriteID;
     }
 
     public void update() {
@@ -95,7 +97,7 @@ public class Weapon {
 
     public void fire(double x, double y, double angle) {
         if (canFire()) {
-            Projectile.fireProjectile(1, 10, x, y, angle);
+            Projectile.fireProjectile(this.bulletSpriteID, 10, x, y, angle);
             this.isAnimating = true;
             lastFireTime = System.currentTimeMillis();
             ammoAmount--;

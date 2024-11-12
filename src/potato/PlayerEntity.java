@@ -11,7 +11,7 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
-    private Weapon currentWeapon = Weapons.SMG;
+    private PlayerInventory inventory;
 
     private boolean moving = false;
 
@@ -21,6 +21,7 @@ public class PlayerEntity extends Entity {
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
+        inventory = new PlayerInventory();
     }
 
     public static PlayerEntity getPlayer()
@@ -39,6 +40,7 @@ public class PlayerEntity extends Entity {
 
     @Override
     public void update(double deltaTime) {
+        inventory.update();
         double actualMoveSpeed = moveSpeed * deltaTime;
         double actualRotateSpeed = rotateSpeed * deltaTime;
 
@@ -108,11 +110,7 @@ public class PlayerEntity extends Entity {
         }
     }
 
-    public Weapon getCurrentWeapon() {
-        return currentWeapon;
-    }
-
-    public void setCurrentWeapon(Weapon currentWeapon) {
-        this.currentWeapon = currentWeapon;
+    public PlayerInventory getInventory() {
+        return inventory;
     }
 }

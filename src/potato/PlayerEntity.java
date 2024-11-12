@@ -11,7 +11,7 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
-    private Weapon currentWeapon = Weapons.SHOTGUN;
+    private Weapon currentWeapon = Weapons.PISTOL;
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);

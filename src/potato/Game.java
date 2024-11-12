@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,8 +15,9 @@ public class Game extends JFrame {
     public static Game GAME;
     public static GameLoop GAMELOOP;
     public static Renderer RENDERER;
-    public Raycaster RAYCASTER;
+    public static Raycaster RAYCASTER;
 
+    private static Logger logger = new Logger(Game.class.getName());
     public static final SoundManager SOUND_MANAGER = new SoundManager();
     private final Set<Integer> pressedKeys = new HashSet<>();
 
@@ -74,8 +76,14 @@ public class Game extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Use Event Dispatch Thread for Swing components
+
+        try {
+            SaveSystem.SETTINGS_SAVE.load();
+        } catch (IOException e) {
+            logger.error(e);
+        }
         SwingUtilities.invokeLater(() -> {
+
             GAMELOOP = new GameLoop();
             RENDERER = new Renderer();
             Game game = new Game();

@@ -32,7 +32,7 @@ public class GameLoop implements Runnable {
 
 
     public int getTargetFPS() {
-        return targetFPS;
+        return SaveSystem.SETTINGS_SAVE.getInt("CAP_FPS", 0);
     }
 
     public void setTargetFPS(int targetFPS) {

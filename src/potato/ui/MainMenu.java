@@ -1,6 +1,9 @@
 package potato.ui;
 
 import potato.Game;
+import potato.SaveSystem;
+
+import java.io.IOException;
 
 public class MainMenu extends Menu {
     public MainMenu() {
@@ -9,9 +12,17 @@ public class MainMenu extends Menu {
             Game.RENDERER.setPaused(false);
         });
         addCheckbox("Lock fps", () -> {
-            Game.GAMELOOP.setTargetFPS(60);
+            SaveSystem.SETTINGS_SAVE.setInt("CAP_FPS", 60);
         },() -> {
-            Game.GAMELOOP.setTargetFPS(0);
+            SaveSystem.SETTINGS_SAVE.setInt("CAP_FPS", 0);
+        });
+
+        addButton("SAVE SETTINGS", () -> {
+            try {
+                SaveSystem.SETTINGS_SAVE.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 }

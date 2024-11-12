@@ -95,7 +95,7 @@ public class Weapon {
 
     public void fire(double x, double y, double angle) {
         if (canFire()) {
-            Projectile.fireProjectile(1, 5, x, y, angle);
+            Projectile.fireProjectile(1, 10, x, y, angle);
             this.isAnimating = true;
             lastFireTime = System.currentTimeMillis();
             ammoAmount--;

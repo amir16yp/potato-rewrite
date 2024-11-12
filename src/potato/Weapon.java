@@ -17,7 +17,7 @@ public class Weapon {
     private boolean isAnimating = false;
     private int scaleFactor;
     private BufferedImage icon;
-    private int ammoAmount = 10;
+    private int ammoAmount = 30;
     private int maxAmmoAmount = 30;
 
     public Weapon(Textures gunSprites, int frameDelay, long cooldownTime, int scaleFactor, String weaponName, BufferedImage icon) {
@@ -34,11 +34,14 @@ public class Weapon {
     }
 
     public void update() {
-        // Smooth bobbing effect using a sine wave
-        long timeElapsed = System.currentTimeMillis() - lastFrameTime;
 
-        // Sine wave function for smooth up and down movement
-        bobOffset = Math.sin(timeElapsed * 0.005 * bobSpeed) * bobRange;
+        if (PlayerEntity.getPlayer().isMoving())
+        {
+            long timeElapsed = System.currentTimeMillis() - lastFrameTime;
+
+            bobOffset = Math.sin(timeElapsed * 0.005 * bobSpeed) * bobRange;
+        }
+
 
         if (!isAnimating) {
             currentFrame = 1;  // Reset to the first frame when animation stops

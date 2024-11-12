@@ -15,7 +15,8 @@ public class MainMenu extends Menu {
             SaveSystem.SETTINGS_SAVE.setInt("CAP_FPS", 60);
         },() -> {
             SaveSystem.SETTINGS_SAVE.setInt("CAP_FPS", 0);
-        });
+        }).setChecked(SaveSystem.SETTINGS_SAVE.getInt("CAP_FPS", 0) == 60);
+
 
         addButton("SAVE SETTINGS", () -> {
             try {

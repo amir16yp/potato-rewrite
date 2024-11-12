@@ -11,7 +11,13 @@ public class PlayerEntity extends Entity {
     private static final double DEFAULT_RADIUS = 0.2;
 
     private static PlayerEntity player;
-    private Weapon currentWeapon = Weapons.PISTOL;
+    private Weapon currentWeapon = Weapons.SMG;
+
+    private boolean moving = false;
+
+    public boolean isMoving() {
+        return moving;
+    }
 
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
@@ -65,6 +71,13 @@ public class PlayerEntity extends Entity {
         if (Game.GAME.isKeyPressed(KeyEvent.VK_D)) {
             moveX += strafeX;
             moveY += strafeY;
+        }
+
+        if (moveX != 0 || moveY != 0)
+        {
+            moving = true;
+        } else {
+            moving = false;
         }
 
 // Normalize the movement vector if we're moving

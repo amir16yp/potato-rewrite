@@ -32,12 +32,12 @@ public abstract class Entity {
     public abstract void update(double deltaTime);
 
     protected boolean isInsideWall() {
-        return Game.GAME.RAYCASTER.currentLevel.isWall(x, y);
+        return Game.RAYCASTER.currentLevel.isWall(x, y);
     }
 
     protected boolean wouldCollide(double newX, double newY) {
         // Check the actual position
-        if (Game.GAME.RAYCASTER.currentLevel.isWall(newX, newY)) {
+        if (Game.RAYCASTER.currentLevel.isWall(newX, newY)) {
             return true;
         }
 
@@ -54,7 +54,7 @@ public abstract class Entity {
         };
 
         for (double[] point : checkPoints) {
-            if (Game.GAME.RAYCASTER.currentLevel.isWall(point[0], point[1])) {
+            if (Game.RAYCASTER.currentLevel.isWall(point[0], point[1])) {
                 return true;
             }
         }

@@ -48,7 +48,7 @@ public class Renderer extends JPanel {
         if (!isPaused())
         {
             hudRenderer.update();
-            Game.GAME.RAYCASTER.update();
+            Game.RAYCASTER.update();
         }
     }
 

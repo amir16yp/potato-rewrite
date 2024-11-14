@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnemyEntity extends Entity {
-    // Animation data structure
+
+    // TODO: add more enemies
+
     protected static class AnimationData {
         final int startTileId;
         final int frameCount;

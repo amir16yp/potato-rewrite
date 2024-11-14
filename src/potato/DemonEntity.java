@@ -3,6 +3,12 @@ package potato;
 import java.awt.event.KeyEvent;
 
 public class DemonEntity extends EnemyEntity {
+
+    /*
+    TODO: add ranged entity class for common methods for ranged attacking entities
+    TODO: the same for melee
+     */
+
     public DemonEntity(double x, double y) {
         super(x, y, 0, 2.0, Math.PI/2, 100, 0.5, new Textures("/potato/sprites/entity/demon.png", 168, 168), 1.0);
 

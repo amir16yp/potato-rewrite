@@ -16,6 +16,11 @@ public class Renderer extends JPanel {
 
     public void setCurrentMenu(potato.ui.Menu menu)
     {
+        if (currentMenu != null)
+        {
+            currentMenu.setVisible(false);
+            menu.setVisible(true);
+        }
         addMouseListener(menu);
         addMouseMotionListener(menu);
         addMouseWheelListener(menu);

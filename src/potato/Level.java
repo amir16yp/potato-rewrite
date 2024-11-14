@@ -29,8 +29,8 @@ public class Level {
         this.entities = new CopyOnWriteArrayList<>();
         this.player = PlayerEntity.getPlayer();
         this.textures = new Textures("/potato/sprites/textures.png", 16, 16);
-        this.floorTexture = textures.getTile(17);
-        this.ceilingTexture = textures.getTile(13);
+       // this.floorTexture = textures.getTile(17);
+        //this.ceilingTexture = textures.getTile(13);
     }
 
     public void update() {

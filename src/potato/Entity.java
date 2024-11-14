@@ -108,6 +108,14 @@ public abstract class Entity {
         this.x = point.getX();
         this.y = point.getY();
     }
+
+    protected double getAngleToEntity(Entity target) {
+        double dx = target.getX() - x;
+        double dy = target.getY() - y;
+        return Math.atan2(dy, dx);
+    }
+
+
     // Getters and setters
     public double getX() { return x; }
     public double getY() { return y; }

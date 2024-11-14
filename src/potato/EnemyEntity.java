@@ -11,11 +11,15 @@ public class EnemyEntity extends Entity {
         final int startTileId;
         final int frameCount;
         final double frameDuration;
+        final Runnable onComplete;  // Callback for animation completion
+        final boolean loop;         // Whether animation should loop
 
-        public AnimationData(int startTileId, int frameCount, double frameDuration) {
+        public AnimationData(int startTileId, int frameCount, double frameDuration, boolean loop, Runnable onComplete) {
             this.startTileId = startTileId;
             this.frameCount = frameCount;
             this.frameDuration = frameDuration;
+            this.onComplete = onComplete;
+            this.loop = loop;
         }
     }
 
@@ -53,10 +57,15 @@ public class EnemyEntity extends Entity {
         // Set default state
         this.currentState = "idle";
     }
-
     protected void defineAnimation(String state, int startTileId, int frameCount, double frameDuration) {
-        animations.put(state, new AnimationData(startTileId, frameCount, frameDuration));
+        defineAnimation(state, startTileId, frameCount, frameDuration, true, null);
     }
+
+    protected void defineAnimation(String state, int startTileId, int frameCount, double frameDuration,
+                                   boolean loop, Runnable onComplete) {
+        animations.put(state, new AnimationData(startTileId, frameCount, frameDuration, loop, onComplete));
+    }
+
 
     protected void setStat(String statName, double value) {
         stats.put(statName, value);
@@ -83,7 +92,21 @@ public class EnemyEntity extends Entity {
             animationTimer += deltaTime;
             if (animationTimer >= currentAnim.frameDuration) {
                 animationTimer -= currentAnim.frameDuration;
-                currentFrame = (currentFrame + 1) % currentAnim.frameCount;
+                currentFrame++;
+
+                // Check if animation has completed a cycle
+                if (currentFrame >= currentAnim.frameCount) {
+                    if (currentAnim.loop) {
+                        currentFrame = 0;
+                    } else {
+                        currentFrame = currentAnim.frameCount - 1;  // Stay on last frame
+                    }
+
+                    // Execute completion callback if it exists
+                    if (currentAnim.onComplete != null) {
+                        currentAnim.onComplete.run();
+                    }
+                }
             }
         }
     }

@@ -15,6 +15,7 @@ public abstract class Entity {
     protected double maxHealth = 100.0;
     protected double radius;  // For collision detection
     protected boolean isDead;
+    protected boolean canTakeDamage = true;
     protected static final double COLLISION_BUFFER = 0.2;
 
     public Entity(double x, double y, double angle, double moveSpeed, double rotateSpeed, double maxHealth, double radius) {
@@ -82,11 +83,20 @@ public abstract class Entity {
     }
 
     public void takeDamage(double damage) {
+        if (!canTakeDamage)
+        {
+            return;
+        }
         health -= damage;
         if (health <= 0) {
             health = 0;
             isDead = true;
         }
+    }
+
+    public void setCanTakeDamage(boolean canTakeDamage)
+    {
+        this.canTakeDamage = canTakeDamage;
     }
 
     public void heal(double amount) {

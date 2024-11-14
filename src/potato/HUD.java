@@ -24,8 +24,10 @@ public class HUD {
     private static final int AMMO_BAR_HEIGHT = 4;
     private static final int LOW_AMMO_THRESHOLD = 3;
     private static final int HEALTH_BAR_WIDTH = 10;
-    private static final int HEALTH_BAR_HEIGHT = 100;
+    private static final int HEALTH_BAR_HEIGHT = 80;
     private static final int LOW_HEALTH_THRESHOLD = 30;
+
+
     public void update() {
         currentWeapon = PlayerEntity.getPlayer().getInventory().getCurrentWeapon();
         inventory = PlayerEntity.getPlayer().getInventory();

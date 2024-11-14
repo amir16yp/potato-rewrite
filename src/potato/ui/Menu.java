@@ -1,7 +1,7 @@
 package potato.ui;
 
-
 import potato.Game;
+import potato.Raycaster;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -31,7 +31,6 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
         super(0, 0, Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT, false);
         this.label = label;
         this.elements = new ArrayList<>();
-
     }
 
     public String getLabel() {
@@ -40,6 +39,24 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
 
     public ArrayList<Menu> getChildMenus() {
         return childMenus;
+    }
+
+    public Label addLabel(String text) {
+        int x = startX();
+        int y = startY() + elements.size() * spacing;
+        Label label = new Label(x, y, buttonWidth, buttonHeight, text);
+        label.setCentered(true);
+        addElement(label);
+        return label;
+    }
+
+    public Label addLabel(String text, boolean centered) {
+        int x = startX();
+        int y = startY() + elements.size() * spacing;
+        Label label = new Label(x, y, buttonWidth, buttonHeight, text);
+        label.setCentered(centered);
+        addElement(label);
+        return label;
     }
 
     public void addChildMenu(Menu menu) {
@@ -51,8 +68,6 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
             Game.RENDERER.setCurrentMenu(menu);
         });
     }
-
-    // Update existing methods to use addElement
 
     public Button addButton(String text, Runnable action) {
         int x = startX();
@@ -71,15 +86,13 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
         return checkbox;
     }
 
-    public VolumeBar addVolumeBar(String label, float initialVolume, Runnable onVolumeChange) {
+    public RangeSlider addSlider(double minValue, double maxValue, double initialValue, int decimalPlaces) {
         int x = startX();
         int y = startY() + elements.size() * spacing;
-        VolumeBar volumeBar = new VolumeBar(x, y, buttonWidth, buttonHeight / 2, label, initialVolume);
-        volumeBar.setOnVolumeChange(onVolumeChange);
-        addElement(volumeBar);
-        return volumeBar;
+        RangeSlider slider = new RangeSlider(x,y,Game.INTERNAL_WIDTH, buttonHeight, minValue, maxValue, initialValue, decimalPlaces);
+        addElement(slider);
+        return slider;
     }
-
 
     private int startX() {
         return getX() + (getWidth() - buttonWidth) / 2;
@@ -147,12 +160,17 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
                 y >= scrollBarY && y <= scrollBarY + scrollBarHeight;
     }
 
-
     @Override
     public void mousePressed(MouseEvent e) {
-        for (UIElement element : elements) {
-            if (element instanceof VolumeBar) {
-                ((VolumeBar) element).handleMouseEvent(e);
+        if (isScrollBarClick(e.getX(), e.getY())) {
+            isDraggingScrollBar = true;
+            dragStartY = e.getY();
+            dragStartOffset = scrollOffset;
+        } else {
+            for (UIElement element : elements) {
+                if (element instanceof RangeSlider) {
+                    ((RangeSlider) element).handleMouseEvent(e);
+                }
             }
         }
     }
@@ -163,13 +181,10 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-    }
+    public void mouseEntered(MouseEvent e) {}
 
     @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
+    public void mouseExited(MouseEvent e) {}
 
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -178,35 +193,33 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
             int scrollBarHeight = getHeight() - 100;
             int newScrollOffset = dragStartOffset + (dragDistance * maxScroll / scrollBarHeight);
             scroll(newScrollOffset - scrollOffset);
+        } else {
+            for (UIElement element : elements) {
+                if (element instanceof RangeSlider) {
+                    ((RangeSlider) element).handleMouseEvent(e);
+                }
+            }
         }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
         for (UIElement element : elements) {
+            boolean containsPoint = element.containsPoint(e.getX(), e.getY(), scrollOffset);
+
             if (element instanceof Button) {
-                Button button = (Button) element;
-                if (button.containsPoint(e.getX(), e.getY(), scrollOffset)) {
-                    button.setSelected(true);
-                    selectedButtonIndex = elements.indexOf(button);
-                } else {
-                    button.setSelected(false);
-                }
+                ((Button) element).setSelected(containsPoint);
+                if (containsPoint) selectedButtonIndex = elements.indexOf(element);
             } else if (element instanceof Checkbox) {
-                Checkbox checkbox = (Checkbox) element;
-                if (checkbox.containsPoint(e.getX(), e.getY(), scrollOffset)) {
-                    checkbox.setSelected(true);
-                    selectedButtonIndex = elements.indexOf(checkbox);
-                } else {
-                    checkbox.setSelected(false);
-                }
+                ((Checkbox) element).setSelected(containsPoint);
+                if (containsPoint) selectedButtonIndex = elements.indexOf(element);
             }
         }
     }
 
     private void drawScrollBar(Graphics g) {
         int scrollBarWidth = 10;
-        int scrollBarHeight = getHeight() - 100; // Adjust as needed
+        int scrollBarHeight = getHeight() - 100;
         int scrollBarX = getX() + getWidth() - scrollBarWidth - 10;
         int scrollBarY = getY() + 50;
 
@@ -224,7 +237,7 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         int notches = e.getWheelRotation();
-        scroll(notches * 20); // Adjust scroll speed as needed
+        scroll(notches * 20);
     }
 
     private void scroll(int amount) {
@@ -257,20 +270,16 @@ public class Menu extends UIElement implements MouseMotionListener, MouseListene
 
     public void activate(UIElement element) {
         if (element instanceof Button) {
-            Button button = (Button) element;
-            button.onOptionSelected();
+            ((Button) element).onOptionSelected();
         } else if (element instanceof Checkbox) {
-            Checkbox checkbox = (Checkbox) element;
-            checkbox.toggleChecked();
+            ((Checkbox) element).toggleChecked();
         }
     }
 
     private void activateSelected() {
         if (!elements.isEmpty()) {
-            //logger.Log(String.valueOf(this.isVisible()));
             UIElement element = elements.get(selectedButtonIndex);
             activate(element);
         }
     }
-
 }

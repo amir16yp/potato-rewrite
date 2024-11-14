@@ -16,7 +16,8 @@ public class Game extends JFrame {
     public static GameLoop GAMELOOP;
     public static Renderer RENDERER;
     public static Raycaster RAYCASTER;
-
+    public static boolean DEV_MODE_ENABLED;
+    public static final LevelGenerator LEVEL_GENERATOR = new LevelGenerator();
     private static Logger logger = new Logger(Game.class.getName());
     public static final SoundManager SOUND_MANAGER = new SoundManager();
     private final Set<Integer> pressedKeys = new HashSet<>();
@@ -90,7 +91,13 @@ public class Game extends JFrame {
     }
 
     public static void main(String[] args) {
-
+        for (String arg : args)
+        {
+            if (arg.equals("--iamsolame"))
+            {
+                DEV_MODE_ENABLED = true;
+            }
+        }
         try {
             SaveSystem.SETTINGS_SAVE.load();
         } catch (IOException e) {

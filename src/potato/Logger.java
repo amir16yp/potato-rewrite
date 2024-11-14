@@ -16,6 +16,9 @@ public class Logger {
     }
 
     private void logInternal(String msg) {
+        if (!Game.DEV_MODE_ENABLED){
+            return;
+        }
         String logMessage = this.className + this.prefix + msg;
         System.out.println(logMessage);
         logs.add(logMessage);

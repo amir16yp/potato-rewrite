@@ -24,7 +24,7 @@ public class DeathScreen {
             Game.RENDERER.showDeathScreen = false;
             PlayerEntity player = PlayerEntity.getPlayer();
             player.heal(100);
-            Game.RAYCASTER.currentLevel = MainMenu.levelGenerator.generateLevel("test", 64, 64);
+            Game.RAYCASTER.currentLevel = Game.LEVEL_GENERATOR.generateLevel("test", 64, 64);
         }
     }
 }

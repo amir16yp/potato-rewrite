@@ -1,5 +1,6 @@
 package potato;
 
+import potato.entities.EnemyEntity;
 import potato.entities.Entity;
 import potato.entities.PlayerEntity;
 
@@ -13,14 +14,22 @@ public class Projectile extends Entity {
     private double y;
     private double angle;
     private boolean dead;
+    private double scale = 1;
     private static final double COLLISION_RADIUS = 0.2;
-
+    private Entity shooter;
     private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/sprites/gun/boolet.png", 32, 32);
 
     public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);
         Projectile projectile = new Projectile(shooter, projectileTexture, speed, x, y, angle);
+        if (shooter instanceof PlayerEntity)
+        {
+            Game.SOUND_MANAGER.playSoundEffect("SHOOT1");
+        } else {
+            Game.SOUND_MANAGER.playSoundEffect("SHOOT1", shooter);
+        }
         Game.RAYCASTER.currentLevel.addEntity(projectile);
+
         return projectile;
     }
 
@@ -30,6 +39,7 @@ public class Projectile extends Entity {
         this.speed = speed;
         this.x = x;
         this.y = y;
+        this.shooter = shooter;
         // Store the initial firing angle - this is crucial
         this.angle = angle;
         this.dead = false;
@@ -51,47 +61,54 @@ public class Projectile extends Entity {
     }
     @Override
     public void render(Graphics2D g) {
-        if (sprite != null) {
-            PlayerEntity player = PlayerEntity.getPlayer();
+        if (sprite == null) return;
 
-            // Calculate relative position to player
-            double relativeX = x - player.getX();
-            double relativeY = y - player.getY();
+        PlayerEntity player = Game.RAYCASTER.currentLevel.getPlayer();
 
-            // Transform coordinates based on player's view angle
-            double playerAngle = player.getAngle();
-            double transformX = relativeX * Math.cos(-playerAngle) - relativeY * Math.sin(-playerAngle);
-            double transformY = relativeX * Math.sin(-playerAngle) + relativeY * Math.cos(-playerAngle);
+        // Calculate vector from player to sprite
+        double dx = x - player.getX();
+        double dy = y - player.getY();
 
-            // Don't render if behind player
-            if (transformX <= 0) return;
+        // Calculate direct distance to sprite
+        double distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Calculate distance for depth scaling
-            double distance = Math.sqrt(transformX * transformX + transformY * transformY);
+        // Calculate sprite's angle relative to player's view direction
+        double spriteAngle = Math.atan2(dy, dx);
+        double playerAngle = player.getAngle();
+        double relativeAngle = spriteAngle - playerAngle;
 
-            // Calculate sprite dimensions with proper perspective scaling
-            // Use WALL_HEIGHT similar to how walls are rendered
-            double spriteHeight = (Raycaster.WALL_HEIGHT / distance) * Raycaster.PLANE_DIST;
-            double spriteWidth = spriteHeight * (sprite.getWidth() / (double)sprite.getHeight());
+        // Normalize angle to [-PI, PI]
+        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
+        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
 
-            // Calculate screen position with proper perspective transformation
-            double screenX = (transformY / transformX) * Raycaster.PLANE_DIST;
-            screenX = (Game.INTERNAL_WIDTH / 2) + (screenX * Game.INTERNAL_WIDTH / 2);
+        // Don't render if outside FOV (with small margin)
+        //double halfFOV = Math.toRadians(Raycaster.FOV) / 2;
+        //if (Math.abs(relativeAngle) > halfFOV * 1.2) {
+        //    return;
+        //}
 
-            // Calculate vertical position using the same wall drawing logic
-            int lineHeight = (int)(spriteHeight);
-            int drawStart = -lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
-            if (drawStart < 0) drawStart = 0;
+        // Calculate screen x position
+        double screenX = (double) Game.INTERNAL_WIDTH / 2 + (Game.INTERNAL_WIDTH * relativeAngle / Math.toRadians(Raycaster.FOV));
 
-            // Calculate drawing coordinates
-            int drawX = (int)(screenX - spriteWidth / 2);
+        // Calculate sprite height based on distance (using same scale as walls)
+        double spriteHeight = (Raycaster.WALL_HEIGHT / distance) * Raycaster.PLANE_DIST * scale;
+        double spriteWidth = spriteHeight * (sprite.getWidth() / (double)sprite.getHeight());
 
-            // Draw the sprite with proper scaling
-            g.drawImage(sprite,
-                    drawX, drawStart,
-                    (int)spriteWidth, (int)spriteHeight,
-                    null);
+        // Calculate drawing positions
+        int drawX = (int)(screenX - spriteWidth / 2);
+        int drawY = (int)((Game.INTERNAL_HEIGHT - spriteHeight) / 2);
+
+        // Don't render if completely off screen
+        if (drawX + spriteWidth < 0 || drawX >= Game.INTERNAL_WIDTH) {
+            return;
         }
+
+        g.drawImage(sprite,
+                drawX, drawY,
+                (int)(drawX + spriteWidth), (int)(drawY + spriteHeight),
+                0, 0,
+                sprite.getWidth(), sprite.getHeight(),
+                null);
     }
 
 

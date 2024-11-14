@@ -14,19 +14,20 @@ public class Renderer extends JPanel {
 
     private Menu currentMenu;
 
-    public void setCurrentMenu(potato.ui.Menu menu)
-    {
-        if (currentMenu != null)
-        {
+    public void setCurrentMenu(Menu menu) {
+        if (currentMenu != null) {
             currentMenu.setVisible(false);
-            menu.setVisible(true);
+            // Remove listeners from old menu
+            removeMouseListener(currentMenu);
+            removeMouseMotionListener(currentMenu);
+            removeMouseWheelListener(currentMenu);
         }
+        menu.setVisible(true);
         addMouseListener(menu);
         addMouseMotionListener(menu);
         addMouseWheelListener(menu);
         currentMenu = menu;
     }
-
     public boolean isPaused() {
         return paused;
     }
@@ -51,13 +52,8 @@ public class Renderer extends JPanel {
     }
 
     public void update() {
-        if (!isPaused())
-        {
-            hudRenderer.update();
-            Game.RAYCASTER.update();
-        } else {
-            currentMenu.update();
-        }
+        hudRenderer.update();
+        Game.RAYCASTER.update();
     }
 
     @Override

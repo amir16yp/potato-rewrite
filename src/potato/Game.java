@@ -43,10 +43,6 @@ public class Game extends JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 pressedKeys.add(e.getKeyCode());
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    PlayerEntity player = PlayerEntity.getPlayer();
-                    player.getInventory().getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
-                }
 
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     if (!RENDERER.isPaused())
@@ -54,6 +50,17 @@ public class Game extends JFrame {
                         RENDERER.setPaused(true);
                     }
                 }
+
+                if (RENDERER.isPaused())
+                {
+                    return;
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    PlayerEntity player = PlayerEntity.getPlayer();
+                    player.getInventory().getCurrentWeapon().fire(player.getX(), player.getY(), player.getAngle());
+                }
+
             }
 
             @Override
@@ -75,6 +82,10 @@ public class Game extends JFrame {
     }
 
     public boolean isKeyPressed(int keycode) {
+        if (RENDERER.isPaused())
+        {
+            return false;
+        }
         return pressedKeys.contains(keycode);
     }
 

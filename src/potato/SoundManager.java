@@ -1,138 +1,106 @@
 package potato;
 
-import javax.sound.sampled.Clip;
+import potato.entities.Entity;
+import potato.entities.PlayerEntity;
+
+import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SoundManager {
-
-    /*
-    TODO: volume adjustment based on distance from the player, for in-game sounds
-     */
-    
-    
-    private final Map<String, Clip> soundEffects; // For storing sound effect clips
-    private Clip backgroundMusic;                 // For storing the background music clip
-    private boolean isMusicPlaying = false;        // Flag to check if music is playing
+    private final Map<String, byte[]> soundData = new HashMap<>();
+    private static final float MAX_DISTANCE = 20.0f;
 
     public SoundManager() {
-        soundEffects = new HashMap<>();
-        loadSoundEffect("CHECK", "/potato/sounds/check.wav");
-        loadSoundEffect("UNCHECK", "/potato/sounds/uncheck.wav");
-        loadSoundEffect("CLICK", "/potato/sounds/click.wav");
+        loadSound("CHECK", "/potato/sounds/check.wav");
+        loadSound("UNCHECK", "/potato/sounds/uncheck.wav");
+        loadSound("CLICK", "/potato/sounds/click.wav");
+        loadSound("SHOOT1", "/potato/sounds/shoot1.wav");
+        loadSound("SHOOT2", "/potato/sounds/shoot2.wav");
     }
 
-    /**
-     * Load a sound effect into memory from resources.
-     * @param name The name of the sound effect.
-     * @param pathFromJar The path to the sound effect file inside the JAR.
-     */
-    public void loadSoundEffect(String name, String pathFromJar) {
+    private void loadSound(String name, String path) {
         try {
-            Clip clip = Utils.loadClip(pathFromJar);
-            soundEffects.put(name, clip);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(
+                    new BufferedInputStream(getClass().getResourceAsStream(path))
+            );
+
+            // Convert to mono PCM format
+            AudioFormat stereoFormat = ais.getFormat();
+            AudioFormat monoFormat = new AudioFormat(
+                    stereoFormat.getSampleRate(),
+                    16,
+                    1,
+                    true,
+                    false
+            );
+
+            AudioInputStream monoStream = AudioSystem.getAudioInputStream(monoFormat, ais);
+
+            byte[] data = new byte[monoStream.available()];
+            monoStream.read(data);
+            soundData.put(name, data);
+
+            monoStream.close();
+            ais.close();
         } catch (Exception e) {
-            System.err.println("Error loading sound effect: " + pathFromJar);
+            System.err.println("Failed to load sound: " + path);
             e.printStackTrace();
         }
     }
 
-    /**
-     * Play a sound effect by name.
-     * @param name The name of the sound effect to play.
-     */
     public void playSoundEffect(String name) {
-        Clip clip = soundEffects.get(name);
-        if (clip != null) {
-            clip.setFramePosition(0);  // Rewind to the start of the sound effect
-            new Thread(() -> {
-                clip.start();
-            }).start();
-        } else {
-            System.err.println("Sound effect not found: " + name);
-        }
+        Thread thread = new Thread(() -> playSound(name, 1.0f));
+        thread.start();
     }
 
-    /**
-     * Load background music and start it from resources.
-     * @param pathFromJar The path to the background music file inside the JAR.
-     */
-    public void loadBackgroundMusic(String pathFromJar) {
+    public void playSoundEffect(String name, Entity source) {
+        //if (!source.canSee(PlayerEntity.getPlayer())) return;
+        float distance = (float) source.getDistance(PlayerEntity.getPlayer());
+        float volume = calculateVolumeForDistance(distance);
+
+        Thread thread = new Thread(() -> playSound(name, volume));
+        thread.start();
+    }
+
+    private void playSound(String name, float volume) {
+        if (!soundData.containsKey(name)) return;
+
         try {
-            backgroundMusic = Utils.loadClip(pathFromJar);
+            AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+
+            if (!AudioSystem.isLineSupported(info)) {
+                System.err.println("Line not supported");
+                return;
+            }
+
+            SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(format);
+
+            if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+                float gain = 20f * (float) Math.log10(volume);
+                gainControl.setValue(Math.max(-80f, Math.min(6f, gain)));
+            }
+
+            line.start();
+            line.write(soundData.get(name), 0, soundData.get(name).length);
+            line.drain();
+            line.close();
         } catch (Exception e) {
-            System.err.println("Error loading background music: " + pathFromJar);
             e.printStackTrace();
         }
     }
 
-    /**
-     * Play the background music in a loop.
-     */
-    public void playBackgroundMusic() {
-        if (backgroundMusic != null && !isMusicPlaying) {
-            backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);  // Play indefinitely
-            isMusicPlaying = true;
-        } else {
-            System.err.println("Background music is either not loaded or already playing.");
-        }
+    private float calculateVolumeForDistance(float distance) {
+        if (distance >= MAX_DISTANCE) return 0.0f;
+        if (distance <= 0) return 1.0f;
+        return 1.0f - (distance / MAX_DISTANCE);
     }
 
-    /**
-     * Stop the background music from playing.
-     */
-    public void stopBackgroundMusic() {
-        if (backgroundMusic != null && isMusicPlaying) {
-            backgroundMusic.stop();
-            isMusicPlaying = false;
-        } else {
-            System.err.println("No background music is currently playing.");
-        }
-    }
-
-    /**
-     * Pause the background music (will resume from where it left off).
-     */
-    public void pauseBackgroundMusic() {
-        if (backgroundMusic != null && isMusicPlaying) {
-            backgroundMusic.stop();
-            isMusicPlaying = false;
-        } else {
-            System.err.println("No background music is currently playing.");
-        }
-    }
-
-    /**
-     * Resume the paused background music.
-     */
-    public void resumeBackgroundMusic() {
-        if (backgroundMusic != null && !isMusicPlaying) {
-            backgroundMusic.start();
-            isMusicPlaying = true;
-        } else {
-            System.err.println("Background music is either not loaded or already playing.");
-        }
-    }
-
-    /**
-     * Stop all sound effects.
-     */
-    public void stopAllSoundEffects() {
-        for (Clip clip : soundEffects.values()) {
-            clip.stop();
-        }
-    }
-
-    /**
-     * Close all audio resources (important to call when exiting).
-     */
     public void close() {
-        stopAllSoundEffects();
-        if (backgroundMusic != null) {
-            backgroundMusic.close();
-        }
-        for (Clip clip : soundEffects.values()) {
-            clip.close();
-        }
+        soundData.clear();
     }
 }

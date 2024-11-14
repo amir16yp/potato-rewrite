@@ -5,7 +5,9 @@ import potato.Weapon;
 import potato.Weapons;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerInventory {
@@ -21,6 +23,11 @@ public class PlayerInventory {
         addWeapon(0, Weapons.SMG);
         addWeaponToFirstEmptySlot(Weapons.PISTOL);
         addWeaponToFirstEmptySlot(Weapons. SHOTGUN);
+    }
+
+    public List<Weapon> getWeapons()
+    {
+        return new ArrayList<Weapon>(weaponSlots.values());
     }
 
     public void addWeapon(int slot, Weapon weapon) {

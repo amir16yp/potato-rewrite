@@ -121,6 +121,31 @@ public abstract class Entity {
         return Math.atan2(dy, dx);
     }
 
+    public double getDistance(Entity other) {
+        double dx = other.getX() - x;
+        double dy = other.getY() - y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public boolean canSee(Entity target) {
+        double dx = target.getX() - x;
+        double dy = target.getY() - y;
+        double distance = getDistance(target);
+
+        double stepSize = 0.1;
+        double steps = distance / stepSize;
+
+        for (int i = 1; i < steps; i++) {
+            double checkX = x + (dx / steps) * i;
+            double checkY = y + (dy / steps) * i;
+
+            if (Game.RAYCASTER.currentLevel.isWall(checkX, checkY)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     // Getters and setters
     public double getX() { return x; }
     public double getY() { return y; }

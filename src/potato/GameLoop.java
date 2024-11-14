@@ -80,7 +80,10 @@ public class GameLoop implements Runnable {
                 deltaTimeMillis = deltaTime * MILLIS_PER_SECOND;
                 lastFrameTime = frameStartTime;
 
-                Game.RENDERER.update();
+                if (!Game.RENDERER.isPaused())
+                {
+                    Game.RENDERER.update();
+                }
                 Game.GAME.repaint();
 
                 updateFPS(frameStartTime);

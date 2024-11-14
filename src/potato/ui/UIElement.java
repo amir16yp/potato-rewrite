@@ -3,7 +3,6 @@ package potato.ui;
 import potato.Game;
 import potato.Logger;
 
-
 import java.awt.*;
 
 public class UIElement {

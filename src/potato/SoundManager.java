@@ -1,6 +1,6 @@
 package potato;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.Clip;
 import java.util.HashMap;
 import java.util.Map;
 

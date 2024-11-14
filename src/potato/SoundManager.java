@@ -6,6 +6,11 @@ import java.util.Map;
 
 public class SoundManager {
 
+    /*
+    TODO: volume adjustment based on distance from the player, for in-game sounds
+     */
+    
+    
     private final Map<String, Clip> soundEffects; // For storing sound effect clips
     private Clip backgroundMusic;                 // For storing the background music clip
     private boolean isMusicPlaying = false;        // Flag to check if music is playing

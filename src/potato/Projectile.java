@@ -14,14 +14,14 @@ public class Projectile extends Entity {
 
     private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/sprites/gun/boolet.png", 32, 32);
 
-    public static Projectile fireProjectile(int textureId, double speed, double x, double y, double angle) {
+    public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);
-        Projectile projectile = new Projectile(projectileTexture, speed, x, y, angle);
+        Projectile projectile = new Projectile(shooter, projectileTexture, speed, x, y, angle);
         Game.RAYCASTER.currentLevel.addEntity(projectile);
         return projectile;
     }
 
-    public Projectile(BufferedImage sprite, double speed, double x, double y, double angle) {
+    public Projectile(Entity shooter, BufferedImage sprite, double speed, double x, double y, double angle) {
         super(x, y, angle, speed, 0, 1, 1);
         this.sprite = sprite;
         this.speed = speed;
@@ -38,7 +38,7 @@ public class Projectile extends Entity {
         // Movement is now based on the initial firing angle
         double dx = Math.cos(angle) * speed * deltaTime;
         double dy = Math.sin(angle) * speed * deltaTime;
-
+        
         x += dx;
         y += dy;
 
@@ -49,7 +49,7 @@ public class Projectile extends Entity {
     @Override
     public void render(Graphics2D g) {
         if (sprite != null) {
-            PlayerEntity player = Game.RAYCASTER.currentLevel.getPlayer();
+            PlayerEntity player = PlayerEntity.getPlayer();
 
             // Calculate relative position to player
             double relativeX = x - player.getX();

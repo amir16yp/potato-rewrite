@@ -47,7 +47,10 @@ public class Game extends JFrame {
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    RENDERER.setPaused(!RENDERER.isPaused());
+                    if (!RENDERER.isPaused())
+                    {
+                        RENDERER.setPaused(true);
+                    }
                 }
             }
 

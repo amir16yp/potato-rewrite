@@ -97,7 +97,7 @@ public class Weapon {
 
     public void fire(double x, double y, double angle) {
         if (canFire()) {
-            Projectile.fireProjectile(this.bulletSpriteID, 10, x, y, angle);
+            Projectile.fireProjectile(PlayerEntity.getPlayer(), this.bulletSpriteID, 10, x, y, angle);
             this.isAnimating = true;
             lastFireTime = System.currentTimeMillis();
             ammoAmount--;

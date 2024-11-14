@@ -9,7 +9,7 @@ public class DemonEntity extends EnemyEntity {
         defineAnimation("idle", 1, 1, 100);
         defineAnimation("walking", 1, 3, 100);
         defineAnimation("attacking", 4, 3, 100, false, () -> {
-            Projectile.fireProjectile(2, 3, this.getX(), this.getY(), getAngleToEntity(PlayerEntity.getPlayer()));
+            Projectile.fireProjectile(this,2, 3, this.getX(), this.getY(), getAngleToEntity(PlayerEntity.getPlayer()));
             setState("walking");
 
         });

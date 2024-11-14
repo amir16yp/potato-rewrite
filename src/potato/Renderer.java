@@ -34,6 +34,7 @@ public class Renderer extends JPanel {
 
     public Renderer() {
         setCurrentMenu(new MainMenu());
+        setPaused(true);
         screenBuffer = new BufferedImage(Game.INTERNAL_WIDTH, Game.INTERNAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
         this.hudRenderer = new HUD();
         // Set panel properties
@@ -49,6 +50,8 @@ public class Renderer extends JPanel {
         {
             hudRenderer.update();
             Game.RAYCASTER.update();
+        } else {
+            currentMenu.update();
         }
     }
 

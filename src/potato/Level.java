@@ -17,6 +17,11 @@ public class Level {
     public Color floorColor;
     public Color ceilingColor;
 
+    /*
+    TODO: Add load from file and save to file using SaveSystem
+    TODO: Add dispose methods to avoid memory leaks when switching levels
+     */
+
     public Level(int[][] map) {
         this.map = map;
         this.mapWidth = map[0].length;

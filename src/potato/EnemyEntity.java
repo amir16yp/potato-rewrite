@@ -142,13 +142,13 @@ public class EnemyEntity extends Entity {
         while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
 
         // Don't render if outside FOV (with small margin)
-        double halfFOV = Math.toRadians(Raycaster.FOV) / 2;
-        if (Math.abs(relativeAngle) > halfFOV * 1.2) {
-            return;
-        }
+        //double halfFOV = Math.toRadians(Raycaster.FOV) / 2;
+        //if (Math.abs(relativeAngle) > halfFOV * 1.2) {
+        //    return;
+        //}
 
         // Calculate screen x position
-        double screenX = Game.INTERNAL_WIDTH / 2 + (Game.INTERNAL_WIDTH * relativeAngle / Math.toRadians(Raycaster.FOV));
+        double screenX = (double) Game.INTERNAL_WIDTH / 2 + (Game.INTERNAL_WIDTH * relativeAngle / Math.toRadians(Raycaster.FOV));
 
         // Calculate sprite height based on distance (using same scale as walls)
         double spriteHeight = (Raycaster.WALL_HEIGHT / distance) * Raycaster.PLANE_DIST * scale;

@@ -20,6 +20,10 @@ public class SaveSystem {
     private static final byte TYPE_STRING = 7;
     private static final byte TYPE_BOOLEAN = 8;
 
+    /*
+    TODO: Add some kind of way to save arrays and nested arrays, in general, for all types
+     */
+
     public static final SaveSystem SETTINGS_SAVE = new SaveSystem("settings.dat");
 
     public SaveSystem(String filename) {

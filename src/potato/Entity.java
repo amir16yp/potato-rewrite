@@ -109,12 +109,15 @@ public abstract class Entity {
         this.y = point.getY();
     }
 
+    /*
+    TODO: add a function that returns a boolean if the player can see another entity or not
+     */
+
     protected double getAngleToEntity(Entity target) {
         double dx = target.getX() - x;
         double dy = target.getY() - y;
         return Math.atan2(dy, dx);
     }
-
 
     // Getters and setters
     public double getX() { return x; }

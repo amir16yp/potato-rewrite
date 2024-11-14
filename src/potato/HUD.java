@@ -44,7 +44,9 @@ public class HUD {
 
     private void drawFPSCounter(Graphics2D g) {
         g.setColor(Color.RED);
-        g.drawString("FPS: " + Game.GAMELOOP.getFPS(), 10, 10);
+        FontMetrics fontMetrics = g.getFontMetrics();
+        //g.drawString("FPS: " + Game.GAMELOOP.getFPS() + " deltaTime:" + Game.GAMELOOP.getDeltaTimeMillis(),0, fontMetrics.getHeight());
+        g.drawString(String.valueOf(Game.GAMELOOP.getFPS()), 0, fontMetrics.getHeight());
     }
 
     private void drawWeaponInfo(Graphics2D g) {

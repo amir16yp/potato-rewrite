@@ -14,7 +14,7 @@ public class Projectile extends Entity {
     private double y;
     private double angle;
     private boolean dead;
-    private double scale = 1;
+    private double scale = 0.5;
     private static final double COLLISION_RADIUS = 0.2;
     private Entity shooter;
     private double damage;

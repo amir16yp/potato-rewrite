@@ -17,11 +17,12 @@ public class Projectile extends Entity {
     private double scale = 1;
     private static final double COLLISION_RADIUS = 0.2;
     private Entity shooter;
+    private double damage;
     private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/sprites/gun/boolet.png", 32, 32);
 
-    public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle) {
+    public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle, double damage) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);
-        Projectile projectile = new Projectile(shooter, projectileTexture, speed, x, y, angle);
+        Projectile projectile = new Projectile(shooter, projectileTexture, speed, x, y, angle, damage);
         if (shooter instanceof PlayerEntity)
         {
             Game.SOUND_MANAGER.playSoundEffect("SHOOT1");
@@ -33,7 +34,7 @@ public class Projectile extends Entity {
         return projectile;
     }
 
-    public Projectile(Entity shooter, BufferedImage sprite, double speed, double x, double y, double angle) {
+    public Projectile(Entity shooter, BufferedImage sprite, double speed, double x, double y, double angle, double damage) {
         super(x, y, angle, speed, 0, 1, 1);
         this.sprite = sprite;
         this.speed = speed;
@@ -43,22 +44,44 @@ public class Projectile extends Entity {
         // Store the initial firing angle - this is crucial
         this.angle = angle;
         this.dead = false;
+        this.damage = damage;
     }
 
     @Override
     public void update() {
         double deltaTime = Game.GAMELOOP.getDeltaTime();
-        // Movement is now based on the initial firing angle
         double dx = Math.cos(angle) * speed * deltaTime;
         double dy = Math.sin(angle) * speed * deltaTime;
-        
+
         x += dx;
         y += dy;
 
         if (Game.RAYCASTER.currentLevel.isWall(x, y)) {
             dead = true;
+            return;
+        }
+
+        // Check for enemy hits when player shoots
+        if (shooter instanceof PlayerEntity) {
+            for (Entity entity : Game.RAYCASTER.currentLevel.getEntities()) {
+                if (entity instanceof EnemyEntity && collidesWith(entity)) {
+                    entity.takeDamage(damage);
+                    dead = true;
+                    return;
+                }
+            }
+        }
+        // Check for player hits when enemy shoots
+        else if (shooter instanceof EnemyEntity) {
+            PlayerEntity player = PlayerEntity.getPlayer();
+            if (collidesWith(player)) {
+                player.takeDamage(damage);
+                dead = true;
+                // return; // idk if this is useless or not. keeping it as a comment
+            }
         }
     }
+
     @Override
     public void render(Graphics2D g) {
         if (sprite == null) return;

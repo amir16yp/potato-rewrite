@@ -8,7 +8,7 @@ import java.awt.event.KeyEvent;
 // PlayerEntity.java
 public class PlayerEntity extends Entity {
     private static final double DEFAULT_MOVE_SPEED = 2.0;
-    private static final double DEFAULT_ROTATE_SPEED = Math.PI;
+    private static final double DEFAULT_ROTATE_SPEED = Math.PI / 2;
     private static final double DEFAULT_MAX_HEALTH = 100.0;
     private static final double DEFAULT_RADIUS = 0.2;
 
@@ -24,6 +24,15 @@ public class PlayerEntity extends Entity {
     public PlayerEntity(double x, double y, double angle) {
         super(x, y, angle, DEFAULT_MOVE_SPEED, DEFAULT_ROTATE_SPEED, DEFAULT_MAX_HEALTH, DEFAULT_RADIUS);
         inventory = new PlayerInventory();
+    }
+
+    @Override
+    public void takeDamage(double damage) {
+        super.takeDamage(damage);
+        if (health <= 0)
+        {
+            Game.RENDERER.showDeathScreen = true;
+        }
     }
 
     public static PlayerEntity getPlayer()
@@ -107,10 +116,6 @@ public class PlayerEntity extends Entity {
             y = originalY;
         }
 
-        // Handle death
-        if (isDead) {
-            // Implement death behavior (game over, respawn, etc.)
-        }
     }
 
     public PlayerInventory getInventory() {

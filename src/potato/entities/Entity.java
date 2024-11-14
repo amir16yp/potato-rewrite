@@ -11,8 +11,8 @@ public abstract class Entity {
     protected double angle; // In radians
     protected double moveSpeed;
     protected double rotateSpeed;
-    protected double health;
-    protected double maxHealth;
+    protected double health = 100.0;
+    protected double maxHealth = 100.0;
     protected double radius;  // For collision detection
     protected boolean isDead;
     protected static final double COLLISION_BUFFER = 0.2;
@@ -152,6 +152,7 @@ public abstract class Entity {
     public double getAngle() { return angle; }
     public double getHealth() { return health; }
     public double getMaxHealth() { return maxHealth; }
+
     public double getRadius() { return radius; }
     public boolean isDead() { return isDead; }
     public void setMoveSpeed(double speed) { this.moveSpeed = speed; }

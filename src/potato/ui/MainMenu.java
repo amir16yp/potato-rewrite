@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class MainMenu extends Menu {
     private Button startResumeBtn;
-    private final LevelGenerator levelGenerator = new LevelGenerator();
+    public static final LevelGenerator levelGenerator = new LevelGenerator();
     private final Menu devMenu;  // Store as field
 
     public MainMenu() {
@@ -55,6 +55,11 @@ public class MainMenu extends Menu {
         menu.addButton("Spawn demon", () -> {
             PlayerEntity player = PlayerEntity.getPlayer();
             Game.RAYCASTER.currentLevel.addEntity(new DemonEntity(player.getX(), player.getY()));
+        });
+
+        menu.addButton("Max health", () -> {
+            PlayerEntity player = PlayerEntity.getPlayer();
+            player.heal(player.getMaxHealth());
         });
 
         menu.addButton("Max ammo", () -> {

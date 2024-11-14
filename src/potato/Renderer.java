@@ -1,5 +1,7 @@
 package potato;
 
+import potato.entities.PlayerEntity;
+import potato.ui.DeathScreen;
 import potato.ui.MainMenu;
 import potato.ui.Menu;
 
@@ -11,9 +13,9 @@ public class Renderer extends JPanel {
     private BufferedImage screenBuffer;
     private boolean paused;
     private HUD hudRenderer;
-
+    private static DeathScreen deathScreen = new DeathScreen();
     private Menu currentMenu;
-
+    public boolean showDeathScreen = false;
     public void setCurrentMenu(Menu menu) {
         if (currentMenu != null) {
             currentMenu.setVisible(false);
@@ -28,6 +30,7 @@ public class Renderer extends JPanel {
         addMouseWheelListener(menu);
         currentMenu = menu;
     }
+
     public boolean isPaused() {
         return paused;
     }
@@ -52,8 +55,18 @@ public class Renderer extends JPanel {
     }
 
     public void update() {
-        hudRenderer.update();
-        Game.RAYCASTER.update();
+        if (!isPaused())
+        {
+            if (showDeathScreen)
+            {
+                deathScreen.update();
+            } else {
+                hudRenderer.update();
+                Game.RAYCASTER.update();
+            }
+
+        }
+
     }
 
     @Override
@@ -67,9 +80,14 @@ public class Renderer extends JPanel {
 
         if (!isPaused())
         {
-            Game.RAYCASTER.render(buffG);
-            hudRenderer.render(buffG);
-
+            if (showDeathScreen)
+            {
+                deathScreen.draw(buffG);
+            }
+            else {
+                Game.RAYCASTER.render(buffG);
+                hudRenderer.render(buffG);
+            }
         } else {
             currentMenu.draw(buffG);
         }

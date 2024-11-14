@@ -33,7 +33,8 @@ public class Projectile extends Entity {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update() {
+        double deltaTime = Game.GAMELOOP.getDeltaTime();
         // Movement is now based on the initial firing angle
         double dx = Math.cos(angle) * speed * deltaTime;
         double dy = Math.sin(angle) * speed * deltaTime;

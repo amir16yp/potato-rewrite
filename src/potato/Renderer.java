@@ -63,7 +63,7 @@ public class Renderer extends JPanel {
 
         if (!isPaused())
         {
-            Game.GAME.RAYCASTER.render(buffG);
+            Game.RAYCASTER.render(buffG);
             hudRenderer.render(buffG);
 
         } else {

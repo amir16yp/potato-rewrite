@@ -29,9 +29,9 @@ public class Level {
     }
 
     public void update() {
-        player.update(Game.GAMELOOP.getDeltaTime());
+        player.update();
         entities.removeIf(Entity::isDead);
-        entities.forEach(entity -> entity.update(Game.GAMELOOP.getDeltaTime()));
+        entities.forEach(Entity::update);
     }
 
     public boolean isWall(double x, double y) {

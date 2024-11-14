@@ -29,7 +29,7 @@ public abstract class Entity {
 
     public abstract void render(Graphics2D graphics2d);
 
-    public abstract void update(double deltaTime);
+    public abstract void update();
 
     protected boolean isInsideWall() {
         return Game.RAYCASTER.currentLevel.isWall(x, y);

@@ -39,7 +39,8 @@ public class PlayerEntity extends Entity {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update() {
+        double deltaTime = Game.GAMELOOP.getDeltaTime();
         inventory.update();
         double actualMoveSpeed = moveSpeed * deltaTime;
         double actualRotateSpeed = rotateSpeed * deltaTime;

@@ -1,40 +1,41 @@
 package potato.ui;
 
 import potato.*;
+import potato.entities.DemonEntity;
+import potato.entities.PlayerEntity;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Random;
 
 public class MainMenu extends Menu {
 
     private Button startResumeBtn;
-
-    private Menu devMenu = new Menu("Dev Menu");
+    private final LevelGenerator levelGenerator = new LevelGenerator();
 
     public MainMenu() {
         super("Main Menu");
-
+        Menu devMenu = new Menu("Dev Menu");
         devMenu.addButton("Spawn demon", () -> {
             PlayerEntity player = PlayerEntity.getPlayer();
             Game.RAYCASTER.currentLevel.addEntity(new DemonEntity(player.getX(), player.getY()));
         });
 
-        startResumeBtn = addButton("Start", () -> {
-            Level level = new Level(new int[][]{
-                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,1,1,1,1,0,0,0,0,0,0,0,1    ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-            });
+        devMenu.addButton("Save current map", () -> {
+            try {
+                Game.RAYCASTER.currentLevel.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
+
+        Menu loadSaveMenu = new Menu("Load Saves");
+        addChildMenu(devMenu);
+
+        startResumeBtn = addButton("Start", () -> {
+            Level level = levelGenerator.generateLevel(String.valueOf(new Random().nextInt()),128, 128);
             level.floorTexture = level.getTexture(17);
             level.ceilingTexture = level.getTexture(13);
 
@@ -42,7 +43,6 @@ public class MainMenu extends Menu {
 
             Game.RENDERER.setPaused(false);
 
-            addChildMenu(devMenu);
 
             startResumeBtn.setOnSelectedAction(() -> {
                 Game.RENDERER.setPaused(false);

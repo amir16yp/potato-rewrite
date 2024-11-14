@@ -1,4 +1,8 @@
-package potato;
+package potato.entities;
+
+import potato.Game;
+import potato.Raycaster;
+import potato.Textures;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

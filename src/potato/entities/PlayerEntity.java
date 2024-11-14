@@ -1,4 +1,6 @@
-package potato;
+package potato.entities;
+
+import potato.Game;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -113,5 +115,13 @@ public class PlayerEntity extends Entity {
 
     public PlayerInventory getInventory() {
         return inventory;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
+    public double getAngle() {
+        return angle;
     }
 }

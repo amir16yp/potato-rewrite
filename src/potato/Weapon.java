@@ -1,5 +1,7 @@
 package potato;
 
+import potato.entities.PlayerEntity;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

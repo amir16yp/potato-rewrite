@@ -1,4 +1,6 @@
-package potato;
+package potato.entities;
+
+import potato.Game;
 
 import java.awt.*;
 

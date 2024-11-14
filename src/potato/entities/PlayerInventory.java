@@ -1,4 +1,8 @@
-package potato;
+package potato.entities;
+
+import potato.Game;
+import potato.Weapon;
+import potato.Weapons;
 
 import java.awt.event.KeyEvent;
 import java.util.HashMap;

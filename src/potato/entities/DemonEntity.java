@@ -1,4 +1,8 @@
-package potato;
+package potato.entities;
+
+import potato.Game;
+import potato.Projectile;
+import potato.Textures;
 
 import java.awt.event.KeyEvent;
 

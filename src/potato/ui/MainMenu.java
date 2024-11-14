@@ -22,18 +22,6 @@ public class MainMenu extends Menu {
             Game.RAYCASTER.currentLevel.addEntity(new DemonEntity(player.getX(), player.getY()));
         });
 
-        devMenu.addButton("Save current map", () -> {
-            try {
-                Game.RAYCASTER.currentLevel.save();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-
-        Menu loadSaveMenu = new Menu("Load Saves");
-        addChildMenu(devMenu);
-
         startResumeBtn = addButton("Start", () -> {
             Level level = levelGenerator.generateLevel(String.valueOf(new Random().nextInt()),128, 128);
             level.floorTexture = level.getTexture(17);
@@ -55,7 +43,7 @@ public class MainMenu extends Menu {
             SaveSystem.SETTINGS_SAVE.setInt("CAP_FPS", 0);
         }).setChecked(SaveSystem.SETTINGS_SAVE.getInt("CAP_FPS", 0) == 60);
 
-
+        addChildMenu(devMenu);
 
         addButton("SAVE SETTINGS", () -> {
             try {

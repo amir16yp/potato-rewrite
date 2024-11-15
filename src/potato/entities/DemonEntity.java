@@ -46,7 +46,7 @@ public class DemonEntity extends EnemyEntity {
                 () -> {
                     Projectile.fireProjectile(
                             this,
-                            2, // TODO: Add to config
+                            config.getInt(GameProperty.DEMON_PROJECTILE_TYPE), // TODO: Add to config
                             config.getDouble(GameProperty.DEMON_PROJECTILE_SPEED),
                             this.getX(),
                             this.getY(),

@@ -58,7 +58,7 @@ public enum GameProperty {
     DEMON_ANIM_ATTACK_COUNT("entity.demon.anim.attack.count", 3),
     DEMON_ANIM_ATTACK_DELAY("entity.demon.anim.attack.delay", 100),
     DEMON_PROJECTILE_SPEED("entity.demon.projectile.speed", 3.0),
-
+    DEMON_PROJECTILE_TYPE("entity.demon.projectile.type", 2),
     DEBUG_SHOW_FPS("debug.show.fps", false),
 
     MAX_SOUND_DISTANCE("sound.max.distance", 20.0);

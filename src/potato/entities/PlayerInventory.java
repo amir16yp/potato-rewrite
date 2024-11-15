@@ -20,9 +20,9 @@ public class PlayerInventory {
         currentSlot = 0;
 
         // Initialize with default weapon (SMG)
-        addWeapon(0, Weapons.SMG);
         addWeaponToFirstEmptySlot(Weapons.PISTOL);
-        addWeaponToFirstEmptySlot(Weapons. SHOTGUN);
+        addWeaponToFirstEmptySlot(Weapons.SHOTGUN);
+        addWeaponToFirstEmptySlot(Weapons.SMG);
     }
 
     public List<Weapon> getWeapons()

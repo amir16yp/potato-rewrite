@@ -18,7 +18,7 @@ public class Projectile extends Entity {
     private static final double COLLISION_RADIUS = 0.2;
     private Entity shooter;
     private double damage;
-    private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/sprites/gun/boolet.png", 32, 32);
+    private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/assets/sprites/gun/boolet.png", 32, 32);
 
     public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle, double damage) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);

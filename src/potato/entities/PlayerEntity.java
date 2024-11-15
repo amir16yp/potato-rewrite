@@ -1,16 +1,18 @@
 package potato.entities;
 
+import potato.ConfigManager;
 import potato.Game;
+import potato.GameProperty;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
 // PlayerEntity.java
 public class PlayerEntity extends Entity {
-    private static final double DEFAULT_MOVE_SPEED = 2.0;
-    private static final double DEFAULT_ROTATE_SPEED = Math.PI / 2;
-    private static final double DEFAULT_MAX_HEALTH = 100.0;
-    private static final double DEFAULT_RADIUS = 0.2;
+    private static final double DEFAULT_MOVE_SPEED = ConfigManager.get().getDouble(GameProperty.PLAYER_MOVE_SPEED);
+    private static final double DEFAULT_ROTATE_SPEED = ConfigManager.get().getDouble(GameProperty.PLAYER_ROTATE_SPEED);
+    private static final double DEFAULT_MAX_HEALTH = ConfigManager.get().getDouble(GameProperty.PLAYER_MAX_HEALTH);
+    private static final double DEFAULT_RADIUS = ConfigManager.get().getDouble(GameProperty.PLAYER_COLLISION_RADIUS);
 
     private static PlayerEntity player;
     private PlayerInventory inventory;

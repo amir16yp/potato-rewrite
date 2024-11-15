@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class Raycaster {
     public static final double PLANE_DIST = 1.0; // Distance to projection plane
-    public static int FOV = 60; // Field of view in degrees
+    public static int FOV = ConfigManager.get().getInt(GameProperty.DEFAULT_FOV); // Field of view in degrees
     public static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
 
     public Level currentLevel;

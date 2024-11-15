@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Game extends JFrame {
-    public static final int INTERNAL_WIDTH = 256;
-    public static final int INTERNAL_HEIGHT = 240;
+    public static final int INTERNAL_WIDTH = ConfigManager.get().getInt(GameProperty.INTERNAL_WIDTH);
+    public static final int INTERNAL_HEIGHT = ConfigManager.get().getInt(GameProperty.INTERNAL_HEIGHT);
     public static Game GAME;
     public static GameLoop GAMELOOP;
     public static Renderer RENDERER;
@@ -28,7 +28,7 @@ public class Game extends JFrame {
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setTitle("Potato");
-        setIconImage(Utils.loadImage("/potato/sprites/icon.png"));
+        setIconImage(Utils.loadImage("/potato/assets/sprites/icon.png"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(true);
 

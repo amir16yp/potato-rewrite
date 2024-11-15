@@ -10,14 +10,14 @@ import java.util.Map;
 
 public class SoundManager {
     private final Map<String, byte[]> soundData = new HashMap<>();
-    private static final float MAX_DISTANCE = 20.0f;
+    private static final float MAX_DISTANCE = (float) ConfigManager.get().getDouble(GameProperty.MAX_SOUND_DISTANCE);
 
     public SoundManager() {
-        loadSound("CHECK", "/potato/sounds/check.wav");
-        loadSound("UNCHECK", "/potato/sounds/uncheck.wav");
-        loadSound("CLICK", "/potato/sounds/click.wav");
-        loadSound("SHOOT1", "/potato/sounds/shoot1.wav");
-        loadSound("SHOOT2", "/potato/sounds/shoot2.wav");
+        loadSound("CHECK", "/potato/assets/sounds/check.wav");
+        loadSound("UNCHECK", "/potato/assets/sounds/uncheck.wav");
+        loadSound("CLICK", "/potato/assets/sounds/click.wav");
+        loadSound("SHOOT1", "/potato/assets/sounds/shoot1.wav");
+        loadSound("SHOOT2", "/potato/assets/sounds/shoot2.wav");
     }
 
     private void loadSound(String name, String path) {

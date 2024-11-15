@@ -39,7 +39,10 @@ public class HUD {
     public void render(Graphics2D g) {
         Color originalColor = g.getColor();
 
-        drawFPSCounter(g);
+        if (ConfigManager.get().getBoolean(GameProperty.DEBUG_SHOW_FPS))
+        {
+            drawFPSCounter(g);
+        }
         drawWeaponInfo(g);
         drawAmmoDisplay(g);
         drawWeaponSlots(g);

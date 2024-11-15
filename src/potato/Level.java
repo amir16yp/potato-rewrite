@@ -2,7 +2,6 @@ package potato;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import potato.entities.Entity;
 import potato.entities.PlayerEntity;
@@ -30,7 +29,7 @@ public class Level {
         this.mapHeight = map.length;
         this.entities = new CopyOnWriteArrayList<>();
         this.player = PlayerEntity.getPlayer();
-        this.textures = new Textures("/potato/sprites/textures.png", 16, 16);
+        this.textures = new Textures("/potato/assets/sprites/textures.png", 16, 16);
         this.name = name;
         this.levelSave = new SaveSystem(name + ".save");
 

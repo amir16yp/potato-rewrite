@@ -1,31 +1,62 @@
 package potato.entities;
 
+import potato.ConfigManager;
 import potato.Game;
+import potato.GameProperty;
 import potato.Projectile;
 import potato.Textures;
 
 public class DemonEntity extends EnemyEntity {
-    private static final Textures TEXTURES = new Textures("/potato/sprites/entity/demon.png", 168, 168);
+    private static final Textures TEXTURES = new Textures("/potato/assets/sprites/entity/demon.png", 168, 168);
     private double attackTimer = 0;
     private boolean canAttack = true;
+    private static final ConfigManager config = ConfigManager.get();
 
     public DemonEntity(double x, double y) {
-        super(x, y, 0, 2.0, Math.PI/2, 100, 0.5, TEXTURES, 1.0);;
+        super(x, y, 0,
+                config.getDouble(GameProperty.DEMON_MOVE_SPEED),
+                config.getDouble(GameProperty.DEMON_ROTATE_SPEED),
+                config.getDouble(GameProperty.DEMON_HEALTH),
+                config.getDouble(GameProperty.DEMON_COLLISION_RADIUS),
+                TEXTURES,
+                config.getDouble(GameProperty.DEMON_SCALE));
 
-        setStat("attackRange", 1.5);
-        setStat("attackDamage", 7.5);
-        setStat("detectionRange", 10.0);
-        setStat("attackCooldown", 500.0); // 1000ms = 1 second
+        // Initialize stats from config
+        setStat("attackRange", config.getDouble(GameProperty.DEMON_ATTACK_RANGE));
+        setStat("attackDamage", config.getDouble(GameProperty.DEMON_ATTACK_DAMAGE));
+        setStat("detectionRange", config.getDouble(GameProperty.DEMON_DETECTION_RANGE));
+        setStat("attackCooldown", config.getDouble(GameProperty.DEMON_ATTACK_COOLDOWN));
 
-        defineAnimation("idle", 1, 1, 100);
-        defineAnimation("walking", 1, 3, 100);
-        defineAnimation("attacking", 4, 3, 100, false, () -> {
-            Projectile.fireProjectile(this, 2, 3, this.getX(), this.getY(), getAngleToEntity(PlayerEntity.getPlayer()), getStat("attackDamage", 0));
-            setState("walking");
-            canAttack = false;
-            attackTimer = 0;
-        });
+        // Define animations from config
+        defineAnimation("idle",
+                config.getInt(GameProperty.DEMON_ANIM_IDLE_FRAME),
+                config.getInt(GameProperty.DEMON_ANIM_IDLE_COUNT),
+                config.getInt(GameProperty.DEMON_ANIM_IDLE_DELAY));
 
+        defineAnimation("walking",
+                config.getInt(GameProperty.DEMON_ANIM_WALK_FRAME),
+                config.getInt(GameProperty.DEMON_ANIM_WALK_COUNT),
+                config.getInt(GameProperty.DEMON_ANIM_WALK_DELAY));
+
+        defineAnimation("attacking",
+                config.getInt(GameProperty.DEMON_ANIM_ATTACK_FRAME),
+                config.getInt(GameProperty.DEMON_ANIM_ATTACK_COUNT),
+                config.getInt(GameProperty.DEMON_ANIM_ATTACK_DELAY),
+                false,
+                () -> {
+                    Projectile.fireProjectile(
+                            this,
+                            2, // TODO: Add to config
+                            config.getDouble(GameProperty.DEMON_PROJECTILE_SPEED),
+                            this.getX(),
+                            this.getY(),
+                            getAngleToEntity(PlayerEntity.getPlayer()),
+                            getStat("attackDamage", 0)
+                    );
+                    setState("walking");
+                    canAttack = false;
+                    attackTimer = 0;
+                });
 
         setState("idle");
     }
@@ -35,14 +66,15 @@ public class DemonEntity extends EnemyEntity {
         super.update();
         PlayerEntity player = PlayerEntity.getPlayer();
 
-        if (this.getDistance(player) >= getStat("detectionRange", 20.0))
-        {
+        if (this.getDistance(player) >= getStat("detectionRange",
+                config.getDouble(GameProperty.DEMON_DETECTION_RANGE))) {
             canAttack = false;
         }
 
         if (!canAttack) {
             attackTimer += Game.GAMELOOP.getDeltaTimeMillis();
-            if (attackTimer >= getStat("attackCooldown", 1000.0)) {
+            if (attackTimer >= getStat("attackCooldown",
+                    config.getDouble(GameProperty.DEMON_ATTACK_COOLDOWN))) {
                 canAttack = true;
             }
         }

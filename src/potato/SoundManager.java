@@ -18,6 +18,7 @@ public class SoundManager {
         loadSound("CLICK", "/potato/assets/sounds/click.wav");
         loadSound("SHOOT1", "/potato/assets/sounds/shoot1.wav");
         loadSound("SHOOT2", "/potato/assets/sounds/shoot2.wav");
+        loadSound("SHOOT3", "/potato/assets/sounds/shoot3.wav");
     }
 
     private void loadSound(String name, String path) {

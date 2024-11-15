@@ -1,10 +1,6 @@
 package potato.entities;
 
-import potato.ConfigManager;
-import potato.Game;
-import potato.GameProperty;
-import potato.Projectile;
-import potato.Textures;
+import potato.*;
 
 public class DemonEntity extends EnemyEntity {
     private static final Textures TEXTURES = new Textures("/potato/assets/sprites/entity/demon.png", 168, 168);
@@ -51,7 +47,8 @@ public class DemonEntity extends EnemyEntity {
                             this.getX(),
                             this.getY(),
                             getAngleToEntity(PlayerEntity.getPlayer()),
-                            getStat("attackDamage", 0)
+                            getStat("attackDamage", 0),
+                            Weapons.SMG.getSoundName()
                     );
                     setState("walking");
                     canAttack = false;

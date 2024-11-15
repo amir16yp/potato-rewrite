@@ -20,14 +20,14 @@ public class Projectile extends Entity {
     private double damage;
     private static final Textures PROJECTILE_TEXUTRES = new Textures("/potato/assets/sprites/gun/boolet.png", 32, 32);
 
-    public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle, double damage) {
+    public static Projectile fireProjectile(Entity shooter, int textureId, double speed, double x, double y, double angle, double damage, String soundName) {
         BufferedImage projectileTexture = PROJECTILE_TEXUTRES.getTile(textureId);
         Projectile projectile = new Projectile(shooter, projectileTexture, speed, x, y, angle, damage);
         if (shooter instanceof PlayerEntity)
         {
-            Game.SOUND_MANAGER.playSoundEffect("SHOOT1");
+            Game.SOUND_MANAGER.playSoundEffect(soundName);
         } else {
-            Game.SOUND_MANAGER.playSoundEffect("SHOOT1", shooter);
+            Game.SOUND_MANAGER.playSoundEffect(soundName, shooter);
         }
         Game.RAYCASTER.currentLevel.addEntity(projectile);
 

@@ -14,7 +14,7 @@ public enum GameProperty {
     PISTOL_FRAME_DELAY("weapon.pistol.frame.delay", 100),
     PISTOL_SCALE("weapon.pistol.scale", 2),
     PISTOL_BULLET_TYPE("weapon.pistol.bullet.type", 3),
-
+    PISTOL_SOUND("weapon.pistol.sound", "SHOOT1"),
     // Weapon properties - Shotgun
     SHOTGUN_DAMAGE("weapon.shotgun.damage", 30.0),
     SHOTGUN_COOLDOWN("weapon.shotgun.cooldown", 1000L),
@@ -22,7 +22,7 @@ public enum GameProperty {
     SHOTGUN_FRAME_DELAY("weapon.shotgun.frame.delay", 100),
     SHOTGUN_SCALE("weapon.shotgun.scale", 2),
     SHOTGUN_BULLET_TYPE("weapon.shotgun.bullet.type", 1),
-
+    SHOTGUN_SOUND("weapon.shotgun.sound", "SHOOT3"),
     // Weapon properties - SMG
     SMG_DAMAGE("weapon.smg.damage", 15.0),
     SMG_COOLDOWN("weapon.smg.cooldown", 150L),
@@ -30,7 +30,7 @@ public enum GameProperty {
     SMG_FRAME_DELAY("weapon.smg.frame.delay", 25),
     SMG_SCALE("weapon.smg.scale", 2),
     SMG_BULLET_TYPE("weapon.smg.bullet.type", 2),
-
+    SMG_SOUND("weapon.smg.sound", "SHOOT2"),
     // Entity properties
     PLAYER_MOVE_SPEED("entity.player.move.speed", 2.0),
     PLAYER_ROTATE_SPEED("entity.player.rotate.speed", Math.PI / 2),

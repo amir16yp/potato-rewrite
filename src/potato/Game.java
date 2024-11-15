@@ -18,7 +18,7 @@ public class Game extends JFrame {
     public static Raycaster RAYCASTER;
     public static boolean DEV_MODE_ENABLED;
     public static final LevelGenerator LEVEL_GENERATOR = new LevelGenerator();
-    private static Logger logger = new Logger(Game.class.getName());
+    private static final Logger logger = new Logger(Game.class.getName());
     public static final SoundManager SOUND_MANAGER = new SoundManager();
     private final Set<Integer> pressedKeys = new HashSet<>();
 

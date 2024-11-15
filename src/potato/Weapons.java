@@ -24,7 +24,8 @@ public class Weapons {
             "Pistol",
             Utils.loadImage(TexturePaths.PISTOL_ICON),
             ConfigManager.get().getInt(GameProperty.PISTOL_BULLET_TYPE),
-            ConfigManager.get().getDouble(GameProperty.PISTOL_DAMAGE)
+            ConfigManager.get().getDouble(GameProperty.PISTOL_DAMAGE
+            ), ConfigManager.get().getString(GameProperty.PISTOL_SOUND)
     );
 
     public static final Weapon SHOTGUN = new Weapon(
@@ -35,7 +36,8 @@ public class Weapons {
             "Shotgun",
             Utils.loadImage(TexturePaths.SHOTGUN_ICON),
             ConfigManager.get().getInt(GameProperty.SHOTGUN_BULLET_TYPE),
-            ConfigManager.get().getDouble(GameProperty.SHOTGUN_DAMAGE)
+            ConfigManager.get().getDouble(GameProperty.SHOTGUN_DAMAGE),
+            ConfigManager.get().getString(GameProperty.SHOTGUN_SOUND)
     );
 
     public static final Weapon SMG = new Weapon(
@@ -46,7 +48,8 @@ public class Weapons {
             "SMG",
             Utils.loadImage(TexturePaths.SMG_ICON),
             ConfigManager.get().getInt(GameProperty.SMG_BULLET_TYPE),
-            ConfigManager.get().getDouble(GameProperty.SMG_DAMAGE)
+            ConfigManager.get().getDouble(GameProperty.SMG_DAMAGE),
+            ConfigManager.get().getString(GameProperty.SMG_SOUND)
     );
 
     static {

@@ -45,6 +45,23 @@ public class ConfigManager {
         }
     }
 
+    public String getString(GameProperty property) {
+        String value = properties.getProperty(property.getKey());
+        if (value == null) {
+            return getStringDefault(property);
+        }
+        return value;
+    }
+
+    private String getStringDefault(GameProperty property) {
+        Object defaultValue = property.getDefaultValue();
+        if (defaultValue instanceof String) {
+            return (String) defaultValue;
+        }
+        logger.error("Expected String default value for property: " + property.getKey());
+        return "";  // Return empty string in case of an error
+    }
+
     public int getInt(GameProperty property) {
         return getPropertyValue(property, Integer::parseInt, property.getDefaultValue());
     }
@@ -98,6 +115,8 @@ public class ConfigManager {
             return (T) defaultValue;  // Cast Double
         } else if (defaultValue instanceof Boolean) {
             return (T) defaultValue;  // Cast Boolean
+        } else if (defaultValue instanceof String) {
+            return (T) defaultValue;  // Cast String
         } else {
             throw new IllegalArgumentException("Unknown default value type: " + defaultValue.getClass());
         }

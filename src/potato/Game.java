@@ -21,11 +21,11 @@ public class Game extends JFrame {
     private static final Logger logger = new Logger(Game.class.getName());
     public static final SoundManager SOUND_MANAGER = new SoundManager();
     private final Set<Integer> pressedKeys = new HashSet<>();
-
+    private static final Textures DEFAULT_TEXTURES = new Textures("/potato/assets/sprites/textures.png", 16, 16);
 
     public Game() {
         GAME = this;
-
+        Wall.setDefaultTextures(DEFAULT_TEXTURES);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setTitle("Potato");
         setIconImage(Utils.loadImage("/potato/assets/sprites/icon.png"));

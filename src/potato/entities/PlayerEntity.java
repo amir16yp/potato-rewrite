@@ -1,8 +1,6 @@
 package potato.entities;
 
-import potato.ConfigManager;
-import potato.Game;
-import potato.GameProperty;
+import potato.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -87,6 +85,20 @@ public class PlayerEntity extends Entity {
         if (Game.GAME.isKeyPressed(KeyEvent.VK_D)) {
             moveX += strafeX;
             moveY += strafeY;
+        }
+
+        if (Game.GAME.isKeyPressed(KeyEvent.VK_F))
+        {
+            Wall interactWall = this.getWallInFront(20);
+            if (interactWall != null)
+            {
+                System.out.println(interactWall.getType());
+                if (interactWall instanceof Door)
+                {
+                    Door door = (Door) interactWall;
+                    door.open();
+                }
+            }
         }
 
         if (moveX != 0 || moveY != 0)

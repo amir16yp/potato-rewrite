@@ -7,7 +7,7 @@ import potato.entities.Entity;
 import potato.entities.PlayerEntity;
 
 public class Level {
-    private int[][] map;
+    private Wall[][] map;
     private final int mapWidth;
     private final int mapHeight;
     private final PlayerEntity player;
@@ -21,7 +21,7 @@ public class Level {
     private final SaveSystem levelSave;
     protected static Logger logger;
 
-    public Level(int[][] map, String name) {
+    public Level(Wall[][] map, String name) {
         logger = new Logger(this.getClass().getName());
         logger.addPrefix(name);
         this.map = map;
@@ -42,6 +42,16 @@ public class Level {
         player.update();
         entities.removeIf(Entity::isDead);
         entities.forEach(Entity::update);
+        for (Wall[] wallRow : map)
+        {
+            for (Wall wall : wallRow)
+            {
+                if (wall != null)
+                {
+                    wall.update();
+                }
+            }
+        }
     }
 
     public boolean isWall(double x, double y) {
@@ -52,7 +62,11 @@ public class Level {
             return true;
         }
 
-        return map[mapY][mapX] > 0;
+        return map[mapY][mapX] != null;
+    }
+
+    public Wall getWall(int x, int y) {
+        return map[y][x];
     }
 
     private int[] flattenMap() {
@@ -84,12 +98,15 @@ public class Level {
     }
 
     // Getters
-    public int[][] getMap() { return map; }
+    public Wall[][] getMap() { return map; }
     public int getMapWidth() { return mapWidth; }
     public int getMapHeight() { return mapHeight; }
     public PlayerEntity getPlayer() { return player; }
     public BufferedImage getTexture(int id) { return textures.getTile(id); }
-    public int getWallType(int x, int y) { return map[y][x]; }
+    public int getWallType(int x, int y) {
+        Wall wall = map[y][x];
+        return wall != null ? wall.getType() : 0;  // Return 0 for empty space
+    }
     public CopyOnWriteArrayList<Entity> getEntities() { return entities; }
     public String getName() { return name; }
 }

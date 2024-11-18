@@ -12,18 +12,25 @@ public class LevelGenerator {
     }
 
     public Level generateLevel(String name, int width, int height) {
-        int[][] map = new int[height][width];
+        Wall[][] map = new Wall[height][width];
+        Level level = new Level(map, name);  // Create level first so we can pass it to doors
 
-        // Generate mostly flat terrain with occasional walls
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // Always have walls at the borders
                 if (x == 0 || x == width-1 || y == 0 || y == height-1) {
-                    map[y][x] = 1;
+                    map[y][x] = new Wall(1); // Basic wall
                 }
                 // Random walls elsewhere with low probability
-                else {
-                    map[y][x] = random.nextFloat() < WALL_CHANCE ? 1 : 0;
+                else if (random.nextFloat() < WALL_CHANCE) {
+                    // Sometimes create doors
+                    if (random.nextFloat() < 0.3f) {
+                        Door door = new Door();
+                        door.setPosition(level, x, y);  // Set the door's position
+                        map[y][x] = door;
+                    } else {
+                        map[y][x] = new Wall(1); // Regular wall
+                    }
                 }
             }
         }
@@ -31,13 +38,13 @@ public class LevelGenerator {
         // Ensure player spawn area is clear
         clearArea(map, 1, 1, 3, 3);
 
-        return new Level(map, name);
+        return level;
     }
 
-    private void clearArea(int[][] map, int x, int y, int width, int height) {
+    private void clearArea(Wall[][] map, int x, int y, int width, int height) {
         for (int dy = y; dy < y + height && dy < map.length; dy++) {
             for (int dx = x; dx < x + width && dx < map[0].length; dx++) {
-                map[dy][dx] = 0;
+                map[dy][dx] = null;
             }
         }
     }

@@ -1,6 +1,7 @@
 package potato.entities;
 
 import potato.Game;
+import potato.Wall;
 
 import java.awt.*;
 
@@ -156,6 +157,33 @@ public abstract class Entity {
 
         return true;
     }
+
+    public Wall getWallInFront(double maxDistance) {
+        double stepSize = 0.1;  // Small steps for accuracy
+
+        for(double dist = 0; dist <= maxDistance; dist += stepSize) {
+            double checkX = x + Math.cos(angle) * dist;
+            double checkY = y + Math.sin(angle) * dist;
+
+            int mapX = (int)checkX;
+            int mapY = (int)checkY;
+
+            // Check if coordinates are within map bounds
+            if (mapX < 0 || mapX >= Game.RAYCASTER.currentLevel.getMapWidth() ||
+                    mapY < 0 || mapY >= Game.RAYCASTER.currentLevel.getMapHeight()) {
+                return null;
+            }
+
+            Wall wall = Game.RAYCASTER.currentLevel.getWall(mapX, mapY);
+            if (wall != null) {
+                return wall;
+            }
+        }
+
+        return null;
+    }
+
+
     // Getters and setters
     public double getX() { return x; }
     public double getY() { return y; }

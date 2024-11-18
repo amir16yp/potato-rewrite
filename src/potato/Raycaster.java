@@ -10,96 +10,14 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Raycaster {
-    public static final double PLANE_DIST = 1.0; // Distance to projection plane
-    public static int FOV = ConfigManager.get().getInt(GameProperty.DEFAULT_FOV); // Field of view in degrees
+    public static final double PLANE_DIST = 1.0;
+    public static int FOV = ConfigManager.get().getInt(GameProperty.DEFAULT_FOV);
     public static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
 
     public Level currentLevel;
 
-    public static void setFOV(int fov)
-    {
+    public static void setFOV(int fov) {
         FOV = fov;
-    }
-
-    private static class RaycastHit {
-        double distance;
-        double wallX;
-        int textureId;
-        boolean side;
-
-        RaycastHit(double distance, double wallX, int textureId, boolean side) {
-            this.distance = distance;
-            this.wallX = wallX;
-            this.textureId = textureId;
-            this.side = side;
-        }
-    }
-
-    // Store wall strips for depth sorting
-    private static class WallStrip {
-        int x;
-        double distance;
-        double rayAngle;
-        RaycastHit hit;
-
-        WallStrip(int x, double distance, double rayAngle, RaycastHit hit) {
-            this.x = x;
-            this.distance = distance;
-            this.rayAngle = rayAngle;
-            this.hit = hit;
-        }
-    }
-
-
-    public void render(Graphics2D graphics2D) {
-        PlayerEntity player = currentLevel.getPlayer();
-        double rayAngleStep = Math.toRadians(FOV) / Game.INTERNAL_WIDTH;
-        double startAngle = player.getAngle() - Math.toRadians(FOV) / 2;
-
-        // Render floor and ceiling first
-        renderFloorAndCeiling(graphics2D, player, startAngle);
-
-        // Rest of the existing rendering code for walls and entities...
-        ArrayList<WallStrip> wallStrips = new ArrayList<>();
-        ArrayList<Map.Entry<Entity, Double>> entities = new ArrayList<>();
-
-        // First pass: collect all wall strips
-        for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
-            double rayAngle = startAngle + x * rayAngleStep;
-            RaycastHit hit = castRay(rayAngle, currentLevel);
-
-            if (hit.textureId > 0) {
-                double perpWallDist = hit.distance * Math.cos(rayAngle - player.getAngle());
-                wallStrips.add(new WallStrip(x, perpWallDist, rayAngle, hit));
-            }
-        }
-
-        // Collect entities...
-        for (Entity entity : currentLevel.getEntities()) {
-            if (entity != player) {
-                double dx = entity.getX() - player.getX();
-                double dy = entity.getY() - player.getY();
-                double distance = Math.sqrt(dx * dx + dy * dy);
-                entities.add(new AbstractMap.SimpleEntry<>(entity, distance));
-            }
-        }
-
-        // Sort and render everything from back to front...
-        wallStrips.sort((a, b) -> Double.compare(b.distance, a.distance));
-        entities.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
-
-        while (!wallStrips.isEmpty() || !entities.isEmpty()) {
-            double nextWallDist = wallStrips.isEmpty() ? Double.NEGATIVE_INFINITY : wallStrips.get(0).distance;
-            double nextEntityDist = entities.isEmpty() ? Double.NEGATIVE_INFINITY : entities.get(0).getValue();
-
-            if (nextWallDist > nextEntityDist) {
-                WallStrip strip = wallStrips.remove(0);
-                renderWallColumn(graphics2D, strip.x, strip.rayAngle, strip.hit);
-            } else {
-                Map.Entry<Entity, Double> entityEntry = entities.remove(0);
-                entityEntry.getKey().render(graphics2D);
-            }
-        }
     }
 
     private void renderFloorAndCeiling(Graphics2D graphics2D, PlayerEntity player, double startAngle) {
@@ -142,6 +60,7 @@ public class Raycaster {
                 // Ceiling pixel (mirror of floor)
                 int ceilingY = Game.INTERNAL_HEIGHT - y - 1;
                 if (currentLevel.ceilingTexture != null) {
+                    // Calculate texture coordinates
                     int tx = (int) ((floorX - cellX) * currentLevel.ceilingTexture.getWidth()) & (currentLevel.ceilingTexture.getWidth() - 1);
                     int ty = (int) ((floorY - cellY) * currentLevel.ceilingTexture.getHeight()) & (currentLevel.ceilingTexture.getHeight() - 1);
 
@@ -153,16 +72,43 @@ public class Raycaster {
                 }
                 graphics2D.drawLine(x, ceilingY, x, ceilingY);
 
+                // Step to next floor position
                 floorX += floorStepX;
                 floorY += floorStepY;
             }
         }
     }
 
-    public void update()
-    {
-        currentLevel.update();
+
+    private static class RaycastHit {
+        double distance;
+        double wallX;
+        Wall wall;
+        boolean side;
+
+        RaycastHit(double distance, double wallX, Wall wall, boolean side) {
+            this.distance = distance;
+            this.wallX = wallX;
+            this.wall = wall;
+            this.side = side;
+        }
     }
+
+    private static class WallStrip {
+        int x;
+        double distance;
+        double rayAngle;
+        RaycastHit hit;
+
+        WallStrip(int x, double distance, double rayAngle, RaycastHit hit) {
+            this.x = x;
+            this.distance = distance;
+            this.rayAngle = rayAngle;
+            this.hit = hit;
+        }
+    }
+
+    // ... renderFloorAndCeiling remains the same ...
 
     private void renderWallColumn(Graphics2D graphics2D, int x, double rayAngle, RaycastHit hit) {
         // Calculate wall height based on distance
@@ -176,7 +122,7 @@ public class Raycaster {
         if (drawEnd >= Game.INTERNAL_HEIGHT) drawEnd = Game.INTERNAL_HEIGHT - 1;
 
         // Get the wall texture
-        BufferedImage texture = currentLevel.getTexture(hit.textureId);
+        BufferedImage texture = hit.wall.getCurrentTexture();
         if (texture != null) {
             // Calculate texture X coordinate
             int texX = (int)(hit.wallX * texture.getWidth());
@@ -233,7 +179,7 @@ public class Raycaster {
         // Perform DDA
         boolean hit = false;
         boolean side = false;
-        int wallType = 0;
+        Wall wall = null;
 
         while (!hit) {
             if (sideDistX < sideDistY) {
@@ -249,10 +195,12 @@ public class Raycaster {
             if (mapX < 0 || mapX >= level.getMapWidth() ||
                     mapY < 0 || mapY >= level.getMapHeight()) {
                 hit = true;
-                wallType = 1;
-            } else if (level.getWallType(mapX, mapY) > 0) {
-                hit = true;
-                wallType = level.getWallType(mapX, mapY);
+                wall = new Wall(1); // Default border wall
+            } else {
+                wall = level.getWall(mapX, mapY);
+                if (wall != null) {
+                    hit = true;
+                }
             }
         }
 
@@ -266,7 +214,7 @@ public class Raycaster {
                 : player.getY() + wallDist * rayDirY;
         wallX -= Math.floor(wallX);
 
-        return new RaycastHit(wallDist, wallX, wallType, side);
+        return new RaycastHit(wallDist, wallX, wall, side);
     }
 
     private int applyFog(int color, float fogFactor) {
@@ -281,5 +229,59 @@ public class Raycaster {
         b = (int) (b * (1 - fogFactor) + 128 * fogFactor);
 
         return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    public void render(Graphics2D graphics2D) {
+        PlayerEntity player = currentLevel.getPlayer();
+        double rayAngleStep = Math.toRadians(FOV) / Game.INTERNAL_WIDTH;
+        double startAngle = player.getAngle() - Math.toRadians(FOV) / 2;
+
+        // Render floor and ceiling first
+        renderFloorAndCeiling(graphics2D, player, startAngle);
+
+        ArrayList<WallStrip> wallStrips = new ArrayList<>();
+        ArrayList<Map.Entry<Entity, Double>> entities = new ArrayList<>();
+
+        // First pass: collect all wall strips
+        for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
+            double rayAngle = startAngle + x * rayAngleStep;
+            RaycastHit hit = castRay(rayAngle, currentLevel);
+
+            if (hit.wall != null) {
+                double perpWallDist = hit.distance * Math.cos(rayAngle - player.getAngle());
+                wallStrips.add(new WallStrip(x, perpWallDist, rayAngle, hit));
+            }
+        }
+
+        // Collect entities
+        for (Entity entity : currentLevel.getEntities()) {
+            if (entity != player) {
+                double dx = entity.getX() - player.getX();
+                double dy = entity.getY() - player.getY();
+                double distance = Math.sqrt(dx * dx + dy * dy);
+                entities.add(new AbstractMap.SimpleEntry<>(entity, distance));
+            }
+        }
+
+        // Sort and render everything from back to front
+        wallStrips.sort((a, b) -> Double.compare(b.distance, a.distance));
+        entities.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+        while (!wallStrips.isEmpty() || !entities.isEmpty()) {
+            double nextWallDist = wallStrips.isEmpty() ? Double.NEGATIVE_INFINITY : wallStrips.get(0).distance;
+            double nextEntityDist = entities.isEmpty() ? Double.NEGATIVE_INFINITY : entities.get(0).getValue();
+
+            if (nextWallDist > nextEntityDist) {
+                WallStrip strip = wallStrips.remove(0);
+                renderWallColumn(graphics2D, strip.x, strip.rayAngle, strip.hit);
+            } else {
+                Map.Entry<Entity, Double> entityEntry = entities.remove(0);
+                entityEntry.getKey().render(graphics2D);
+            }
+        }
+    }
+
+    public void update() {
+        currentLevel.update();
     }
 }

@@ -29,7 +29,7 @@ public class Projectile extends Entity {
         } else {
             Game.SOUND_MANAGER.playSoundEffect(soundName, shooter);
         }
-        Game.RAYCASTER.currentLevel.addEntity(projectile);
+        Game.LEVEL_GENERATOR.generatedLevel.addEntity(projectile);
 
         return projectile;
     }
@@ -56,14 +56,14 @@ public class Projectile extends Entity {
         x += dx;
         y += dy;
 
-        if (Game.RAYCASTER.currentLevel.isWall(x, y)) {
+        if (Game.LEVEL_GENERATOR.generatedLevel.isWall(x, y)) {
             dead = true;
             return;
         }
 
         // Check for enemy hits when player shoots
         if (shooter instanceof PlayerEntity) {
-            for (Entity entity : Game.RAYCASTER.currentLevel.getEntities()) {
+            for (Entity entity : Game.LEVEL_GENERATOR.generatedLevel.getEntities()) {
                 if (entity instanceof EnemyEntity && collidesWith(entity)) {
                     entity.takeDamage(damage);
                     dead = true;
@@ -86,7 +86,7 @@ public class Projectile extends Entity {
     public void render(Graphics2D g) {
         if (sprite == null) return;
 
-        PlayerEntity player = Game.RAYCASTER.currentLevel.getPlayer();
+        PlayerEntity player = PlayerEntity.getPlayer();
 
         // Calculate vector from player to sprite
         double dx = x - player.getX();

@@ -17,11 +17,9 @@ public class MainMenu extends Menu {
         super("Main Menu");
 
         startResumeBtn = addButton("Start", () -> {
-            Level level = Game.LEVEL_GENERATOR.generateLevel(String.valueOf(new Random().nextInt()), 128, 128);
-            level.floorTexture = level.getTexture(17);
-            level.ceilingTexture = level.getTexture(13);
+            Game.LEVEL_GENERATOR.generatedLevel.floorTexture = Game.LEVEL_GENERATOR.generatedLevel.getTexture(17);
+            Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture = Game.LEVEL_GENERATOR.generatedLevel.getTexture(13);
 
-            Game.RAYCASTER.currentLevel = level;
             Game.RENDERER.setPaused(false);
 
             startResumeBtn.setOnSelectedAction(() -> {
@@ -56,7 +54,7 @@ public class MainMenu extends Menu {
         Menu menu = new Menu("Cheats Menu");
         menu.addButton("Spawn demon", () -> {
             PlayerEntity player = PlayerEntity.getPlayer();
-            Game.RAYCASTER.currentLevel.addEntity(new DemonEntity(player.getX(), player.getY()));
+            Game.LEVEL_GENERATOR.generatedLevel.addEntity(new DemonEntity(player.getX(), player.getY()));
         });
 
         menu.addButton("Max health", () -> {

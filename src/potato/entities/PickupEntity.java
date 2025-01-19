@@ -22,7 +22,7 @@ public class PickupEntity extends Entity{
     public void render(Graphics2D g) {
         if (sprite == null) return;
 
-        PlayerEntity player = Game.RAYCASTER.currentLevel.getPlayer();
+        PlayerEntity player = PlayerEntity.getPlayer();
 
         // Calculate vector from player to sprite
         double dx = x - player.getX();

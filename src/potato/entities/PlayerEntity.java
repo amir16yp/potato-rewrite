@@ -39,7 +39,8 @@ public class PlayerEntity extends Entity {
     {
         if (player == null)
         {
-            player = new PlayerEntity(1.5, 1.5, 0.0);
+            int[] spawnXY = Game.LEVEL_GENERATOR.getSpawnRoomCenterXY();
+            player = new PlayerEntity(spawnXY[0], spawnXY[1], 0.0);
         }
         return player;
     }
@@ -89,7 +90,7 @@ public class PlayerEntity extends Entity {
 
         if (Game.GAME.isKeyPressed(KeyEvent.VK_F))
         {
-            Wall interactWall = this.getWallInFront(20);
+            Wall interactWall = this.getWallInFront(3);
             if (interactWall != null)
             {
                 System.out.println(interactWall.getType());

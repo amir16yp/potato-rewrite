@@ -36,12 +36,12 @@ public abstract class Entity {
     public abstract void update();
 
     protected boolean isInsideWall() {
-        return Game.RAYCASTER.currentLevel.isWall(x, y);
+        return Game.LEVEL_GENERATOR.generatedLevel.isWall(x, y);
     }
 
     protected boolean wouldCollide(double newX, double newY) {
         // Check the actual position
-        if (Game.RAYCASTER.currentLevel.isWall(newX, newY)) {
+        if (Game.LEVEL_GENERATOR.generatedLevel.isWall(newX, newY)) {
             return true;
         }
 
@@ -58,7 +58,7 @@ public abstract class Entity {
         };
 
         for (double[] point : checkPoints) {
-            if (Game.RAYCASTER.currentLevel.isWall(point[0], point[1])) {
+            if (Game.LEVEL_GENERATOR.generatedLevel.isWall(point[0], point[1])) {
                 return true;
             }
         }
@@ -150,7 +150,7 @@ public abstract class Entity {
             double checkX = x + (dx / steps) * i;
             double checkY = y + (dy / steps) * i;
 
-            if (Game.RAYCASTER.currentLevel.isWall(checkX, checkY)) {
+            if (Game.LEVEL_GENERATOR.generatedLevel.isWall(checkX, checkY)) {
                 return false;
             }
         }
@@ -169,12 +169,12 @@ public abstract class Entity {
             int mapY = (int)checkY;
 
             // Check if coordinates are within map bounds
-            if (mapX < 0 || mapX >= Game.RAYCASTER.currentLevel.getMapWidth() ||
-                    mapY < 0 || mapY >= Game.RAYCASTER.currentLevel.getMapHeight()) {
+            if (mapX < 0 || mapX >= Game.LEVEL_GENERATOR.generatedLevel.getMapWidth() ||
+                    mapY < 0 || mapY >= Game.LEVEL_GENERATOR.generatedLevel.getMapHeight()) {
                 return null;
             }
 
-            Wall wall = Game.RAYCASTER.currentLevel.getWall(mapX, mapY);
+            Wall wall = Game.LEVEL_GENERATOR.generatedLevel.getWall(mapX, mapY);
             if (wall != null) {
                 return wall;
             }

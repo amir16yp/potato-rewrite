@@ -14,8 +14,6 @@ public class Raycaster {
     public static int FOV = ConfigManager.get().getInt(GameProperty.DEFAULT_FOV);
     public static final int WALL_HEIGHT = Game.INTERNAL_HEIGHT / 2;
 
-    public Level currentLevel;
-
     public static void setFOV(int fov) {
         FOV = fov;
     }
@@ -44,31 +42,31 @@ public class Raycaster {
                 int cellY = (int) floorY;
 
                 // Floor pixel
-                if (currentLevel.floorTexture != null) {
+                if (Game.LEVEL_GENERATOR.generatedLevel.floorTexture != null) {
                     // Calculate texture coordinates
-                    int tx = (int) ((floorX - cellX) * currentLevel.floorTexture.getWidth()) & (currentLevel.floorTexture.getWidth() - 1);
-                    int ty = (int) ((floorY - cellY) * currentLevel.floorTexture.getHeight()) & (currentLevel.floorTexture.getHeight() - 1);
+                    int tx = (int) ((floorX - cellX) * Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getWidth()) & (Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getWidth() - 1);
+                    int ty = (int) ((floorY - cellY) * Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getHeight()) & (Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getHeight() - 1);
 
-                    int color = currentLevel.floorTexture.getRGB(tx, ty);
+                    int color = Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getRGB(tx, ty);
                     color = applyFog(color, (float) Math.min(1.0, rowDistance / 10.0));
                     graphics2D.setColor(new Color(color));
                 } else {
-                    graphics2D.setColor(currentLevel.floorColor);
+                    graphics2D.setColor(Game.LEVEL_GENERATOR.generatedLevel.floorColor);
                 }
                 graphics2D.drawLine(x, y, x, y);
 
                 // Ceiling pixel (mirror of floor)
                 int ceilingY = Game.INTERNAL_HEIGHT - y - 1;
-                if (currentLevel.ceilingTexture != null) {
+                if (Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture != null) {
                     // Calculate texture coordinates
-                    int tx = (int) ((floorX - cellX) * currentLevel.ceilingTexture.getWidth()) & (currentLevel.ceilingTexture.getWidth() - 1);
-                    int ty = (int) ((floorY - cellY) * currentLevel.ceilingTexture.getHeight()) & (currentLevel.ceilingTexture.getHeight() - 1);
+                    int tx = (int) ((floorX - cellX) * Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture.getWidth()) & (Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture.getWidth() - 1);
+                    int ty = (int) ((floorY - cellY) * Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture.getHeight()) & (Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture.getHeight() - 1);
 
-                    int color = currentLevel.ceilingTexture.getRGB(tx, ty);
+                    int color = Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture.getRGB(tx, ty);
                     color = applyFog(color, (float) Math.min(1.0, rowDistance / 10.0));
                     graphics2D.setColor(new Color(color));
                 } else {
-                    graphics2D.setColor(currentLevel.ceilingColor);
+                    graphics2D.setColor(Game.LEVEL_GENERATOR.generatedLevel.ceilingColor);
                 }
                 graphics2D.drawLine(x, ceilingY, x, ceilingY);
 
@@ -111,8 +109,10 @@ public class Raycaster {
     // ... renderFloorAndCeiling remains the same ...
 
     private void renderWallColumn(Graphics2D graphics2D, int x, double rayAngle, RaycastHit hit) {
-        // Calculate wall height based on distance
-        double perpWallDist = hit.distance * Math.cos(rayAngle - currentLevel.getPlayer().getAngle());
+        if (hit.wall == null || hit.wall.getCurrentTexture() == null) {
+            return;
+        }
+        double perpWallDist = hit.distance * Math.cos(rayAngle - PlayerEntity.getPlayer().getAngle());
         int lineHeight = (int) (WALL_HEIGHT / perpWallDist);
 
         // Calculate drawing bounds
@@ -121,38 +121,35 @@ public class Raycaster {
         int drawEnd = lineHeight / 2 + Game.INTERNAL_HEIGHT / 2;
         if (drawEnd >= Game.INTERNAL_HEIGHT) drawEnd = Game.INTERNAL_HEIGHT - 1;
 
-        // Get the wall texture
         BufferedImage texture = hit.wall.getCurrentTexture();
-        if (texture != null) {
-            // Calculate texture X coordinate
-            int texX = (int)(hit.wallX * texture.getWidth());
-            if ((!hit.side && Math.cos(rayAngle) < 0) ||
-                    (hit.side && Math.sin(rayAngle) < 0)) {
-                texX = texture.getWidth() - texX - 1;
-            }
+        // Calculate texture X coordinate
+        int texX = (int)(hit.wallX * texture.getWidth());
+        if ((!hit.side && Math.cos(rayAngle) < 0) ||
+                (hit.side && Math.sin(rayAngle) < 0)) {
+            texX = texture.getWidth() - texX - 1;
+        }
 
-            // Draw the textured wall strip
-            double step = (double) texture.getHeight() / lineHeight;
-            double texPos = (drawStart - Game.INTERNAL_HEIGHT / 2.0 + lineHeight / 2.0) * step;
+        // Draw the textured wall strip
+        double step = (double) texture.getHeight() / lineHeight;
+        double texPos = (drawStart - Game.INTERNAL_HEIGHT / 2.0 + lineHeight / 2.0) * step;
 
-            for (int y = drawStart; y < drawEnd; y++) {
-                int texY = (int) texPos & (texture.getHeight() - 1);
-                texPos += step;
+        for (int y = drawStart; y < drawEnd; y++) {
+            int texY = (int) texPos & (texture.getHeight() - 1);
+            texPos += step;
 
-                int color = texture.getRGB(texX, texY);
+            int color = texture.getRGB(texX, texY);
 
-                // Apply distance fog
-                float fogFactor = (float) Math.min(1.0, hit.distance / 10.0);
-                color = applyFog(color, fogFactor);
+            // Apply distance fog
+            float fogFactor = (float) Math.min(1.0, hit.distance / 10.0);
+            color = applyFog(color, fogFactor);
 
-                graphics2D.setColor(new Color(color));
-                graphics2D.drawLine(x, y, x, y);
-            }
+            graphics2D.setColor(new Color(color));
+            graphics2D.drawLine(x, y, x, y);
         }
     }
 
     private RaycastHit castRay(double rayAngle, Level level) {
-        PlayerEntity player = level.getPlayer();
+        PlayerEntity player = PlayerEntity.getPlayer();
         double rayDirX = Math.cos(rayAngle);
         double rayDirY = Math.sin(rayAngle);
 
@@ -164,7 +161,6 @@ public class Raycaster {
         double deltaDistX = Math.abs(1 / rayDirX);
         double deltaDistY = Math.abs(1 / rayDirY);
 
-        // Calculate step and initial sideDist
         int stepX = rayDirX < 0 ? -1 : 1;
         int stepY = rayDirY < 0 ? -1 : 1;
 
@@ -176,7 +172,6 @@ public class Raycaster {
                 ? (player.getY() - mapY) * deltaDistY
                 : (mapY + 1.0 - player.getY()) * deltaDistY;
 
-        // Perform DDA
         boolean hit = false;
         boolean side = false;
         Wall wall = null;
@@ -192,13 +187,16 @@ public class Raycaster {
                 side = true;
             }
 
+            // Check bounds first
             if (mapX < 0 || mapX >= level.getMapWidth() ||
                     mapY < 0 || mapY >= level.getMapHeight()) {
                 hit = true;
-                wall = new Wall(1); // Default border wall
+                wall = new Wall(1); // Border wall
             } else {
+                // Get the wall at current position
                 wall = level.getWall(mapX, mapY);
-                if (wall != null) {
+                // Only stop if we hit a solid wall (not null and has texture)
+                if (wall != null && wall.getCurrentTexture() != null) {
                     hit = true;
                 }
             }
@@ -216,7 +214,6 @@ public class Raycaster {
 
         return new RaycastHit(wallDist, wallX, wall, side);
     }
-
     private int applyFog(int color, float fogFactor) {
         int a = (color >> 24) & 0xff;
         int r = (color >> 16) & 0xff;
@@ -232,7 +229,7 @@ public class Raycaster {
     }
 
     public void render(Graphics2D graphics2D) {
-        PlayerEntity player = currentLevel.getPlayer();
+        PlayerEntity player = PlayerEntity.getPlayer();
         double rayAngleStep = Math.toRadians(FOV) / Game.INTERNAL_WIDTH;
         double startAngle = player.getAngle() - Math.toRadians(FOV) / 2;
 
@@ -245,7 +242,7 @@ public class Raycaster {
         // First pass: collect all wall strips
         for (int x = 0; x < Game.INTERNAL_WIDTH; x++) {
             double rayAngle = startAngle + x * rayAngleStep;
-            RaycastHit hit = castRay(rayAngle, currentLevel);
+            RaycastHit hit = castRay(rayAngle, Game.LEVEL_GENERATOR.generatedLevel);
 
             if (hit.wall != null) {
                 double perpWallDist = hit.distance * Math.cos(rayAngle - player.getAngle());
@@ -254,7 +251,7 @@ public class Raycaster {
         }
 
         // Collect entities
-        for (Entity entity : currentLevel.getEntities()) {
+        for (Entity entity : Game.LEVEL_GENERATOR.generatedLevel.getEntities()) {
             if (entity != player) {
                 double dx = entity.getX() - player.getX();
                 double dy = entity.getY() - player.getY();
@@ -282,6 +279,6 @@ public class Raycaster {
     }
 
     public void update() {
-        currentLevel.update();
+        Game.LEVEL_GENERATOR.generatedLevel.update();
     }
 }

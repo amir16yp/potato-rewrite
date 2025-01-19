@@ -10,8 +10,9 @@ public class Door extends Wall {
     private int mapX, mapY;
     private int frame = 1;
     private boolean isOpening = false;
+    private boolean isFullyOpen = false;  // New flag to track fully open state
     private static final int FRAME_COUNT = 16;
-    private static final double FRAME_DURATION = 50; // milliseconds
+    private static final double FRAME_DURATION = 50;
     private double frameTimer = 0;
 
     public Door() {
@@ -25,7 +26,7 @@ public class Door extends Wall {
     }
 
     public void open() {
-        if (!isOpening) {
+        if (!isOpening && !isFullyOpen) {
             isOpening = true;
             frame = 1;
             frameTimer = 0;
@@ -34,17 +35,26 @@ public class Door extends Wall {
 
     @Override
     public void update() {
-        if (isOpening) {
+        if (isOpening && !isFullyOpen) {
             frameTimer += Game.GAMELOOP.getDeltaTimeMillis();
             if (frameTimer >= FRAME_DURATION) {
                 frameTimer -= FRAME_DURATION;
                 frame++;
 
                 if (frame > FRAME_COUNT) {
-                    // Animation complete, remove door
+                    isFullyOpen = true;
+                    isOpening = false;
                     if (level != null) {
-                        Wall[][] map = level.getMap();
-                        map[mapY][mapX] = null;
+                        try {
+                            Wall[][] map = level.getMap();
+                            if (map != null && mapY >= 0 && mapY < map.length
+                                    && mapX >= 0 && mapX < map[mapY].length) {
+                                map[mapY][mapX] = null;
+                            }
+                        } catch (Exception e) {
+                            // Handle any potential array access issues
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -53,10 +63,13 @@ public class Door extends Wall {
 
     @Override
     public BufferedImage getCurrentTexture() {
+        if (isFullyOpen) {
+            return null;  // Return null when fully open
+        }
         if (isOpening) {
-            return DOOR_TEXTURES.getTile(frame);
+            int safeFrame = Math.min(frame, FRAME_COUNT);
+            return DOOR_TEXTURES.getTile(safeFrame);
         }
         return DEFAULT_TEXTURES.getTile(type);
     }
-}
-
+}   

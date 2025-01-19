@@ -10,7 +10,6 @@ public class Level {
     private Wall[][] map;
     private final int mapWidth;
     private final int mapHeight;
-    private final PlayerEntity player;
     private final CopyOnWriteArrayList<Entity> entities;
     private Textures textures;
     public BufferedImage floorTexture;
@@ -28,7 +27,6 @@ public class Level {
         this.mapWidth = map[0].length;
         this.mapHeight = map.length;
         this.entities = new CopyOnWriteArrayList<>();
-        this.player = PlayerEntity.getPlayer();
         this.textures = new Textures("/potato/assets/sprites/textures.png", 16, 16);
         this.name = name;
         this.levelSave = new SaveSystem(name + ".save");
@@ -39,7 +37,6 @@ public class Level {
     }
 
     public void update() {
-        player.update();
         entities.removeIf(Entity::isDead);
         entities.forEach(Entity::update);
         for (Wall[] wallRow : map)
@@ -62,7 +59,17 @@ public class Level {
             return true;
         }
 
-        return map[mapY][mapX] != null;
+        Wall wall = getWall(mapX, mapY);
+        if (wall == null) {
+            return false;
+        }
+
+        // If it's a door, check if it's passable
+        if (wall instanceof Door) {
+            return wall.getCurrentTexture() != null;
+        }
+
+        return true;
     }
 
     public Wall getWall(int x, int y) {
@@ -101,7 +108,6 @@ public class Level {
     public Wall[][] getMap() { return map; }
     public int getMapWidth() { return mapWidth; }
     public int getMapHeight() { return mapHeight; }
-    public PlayerEntity getPlayer() { return player; }
     public BufferedImage getTexture(int id) { return textures.getTile(id); }
     public int getWallType(int x, int y) {
         Wall wall = map[y][x];

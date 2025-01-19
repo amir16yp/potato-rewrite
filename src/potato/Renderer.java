@@ -61,6 +61,10 @@ public class Renderer extends JPanel {
             {
                 deathScreen.update();
             } else {
+                if (PlayerEntity.getPlayer() != null)
+                {
+                    PlayerEntity.getPlayer().update();
+                }
                 hudRenderer.update();
                 Game.RAYCASTER.update();
             }

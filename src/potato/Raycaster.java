@@ -18,9 +18,20 @@ public class Raycaster {
     private static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_COUNT);
     private final ReentrantLock graphicsLock = new ReentrantLock();
-
+    private static int FOG_COLOR = new Color(135, 206, 250)
+            .getRGB();
     public static void setFOV(int fov) {
         FOV = fov;
+    }
+
+    public static void setFogColor(Color color)
+    {
+        FOG_COLOR = color.getRGB();
+    }
+
+    public Raycaster()
+    {
+        System.out.println("USING " + THREAD_COUNT + " THREADS FOR RAYCASTING");
     }
 
     private static class RaycastHit {
@@ -89,7 +100,7 @@ public class Raycaster {
                             int tx = (int) ((floorX - cellX) * Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getWidth()) & (Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getWidth() - 1);
                             int ty = (int) ((floorY - cellY) * Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getHeight()) & (Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getHeight() - 1);
                             int color = Game.LEVEL_GENERATOR.generatedLevel.floorTexture.getRGB(tx, ty);
-                            color = applyFog(color, (float) Math.min(1.0, rowDistance / 10.0));
+                            color = applyFog(color, (float) Math.min(1.0, rowDistance / 20.0));
                             graphics2D.setColor(new Color(color));
                         } else {
                             graphics2D.setColor(Game.LEVEL_GENERATOR.generatedLevel.floorColor);
@@ -256,9 +267,13 @@ public class Raycaster {
         int g = (color >> 8) & 0xff;
         int b = color & 0xff;
 
-        r = (int) (r * (1 - fogFactor) + 128 * fogFactor);
-        g = (int) (g * (1 - fogFactor) + 128 * fogFactor);
-        b = (int) (b * (1 - fogFactor) + 128 * fogFactor);
+        int fogR = (FOG_COLOR >> 16) & 0xff;
+        int fogG = (FOG_COLOR >> 8) & 0xff;
+        int fogB = FOG_COLOR & 0xff;
+
+        r = (int) (r * (1 - fogFactor) + fogR * fogFactor);
+        g = (int) (g * (1 - fogFactor) + fogG * fogFactor);
+        b = (int) (b * (1 - fogFactor) + fogB * fogFactor);
 
         return (a << 24) | (r << 16) | (g << 8) | b;
     }

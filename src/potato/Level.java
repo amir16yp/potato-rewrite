@@ -33,7 +33,8 @@ public class Level {
 
         // Default colors if textures aren't loaded
         this.floorColor = new Color(100, 100, 100);
-        this.ceilingColor = new Color(50, 50, 50);
+        this.ceilingColor = new Color(135, 206, 250);
+
     }
 
     public void update() {

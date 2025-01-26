@@ -18,7 +18,7 @@ public class MainMenu extends Menu {
 
         startResumeBtn = addButton("Start", () -> {
             Game.LEVEL_GENERATOR.generatedLevel.floorTexture = Game.LEVEL_GENERATOR.generatedLevel.getTexture(17);
-            Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture = Game.LEVEL_GENERATOR.generatedLevel.getTexture(13);
+            //Game.LEVEL_GENERATOR.generatedLevel.ceilingTexture = Game.LEVEL_GENERATOR.generatedLevel.getTexture(13);
 
             Game.RENDERER.setPaused(false);
 

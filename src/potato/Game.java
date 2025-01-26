@@ -10,6 +10,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Game extends JFrame {
+
+
+    static {
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.d3d", "true");
+    }
+
     public static final int INTERNAL_WIDTH = ConfigManager.get().getInt(GameProperty.INTERNAL_WIDTH);
     public static final int INTERNAL_HEIGHT = ConfigManager.get().getInt(GameProperty.INTERNAL_HEIGHT);
     public static Game GAME;

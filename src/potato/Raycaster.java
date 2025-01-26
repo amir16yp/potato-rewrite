@@ -24,6 +24,8 @@ public class Raycaster {
         FOV = fov;
     }
 
+
+    // TODO: make this level dependant
     public static void setFogColor(Color color)
     {
         FOG_COLOR = color.getRGB();
